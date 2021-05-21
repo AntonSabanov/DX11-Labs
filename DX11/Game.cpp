@@ -1,0 +1,190 @@
+#include "pch.h"
+#include "Game.h"
+#include "DisplayWindow.h"
+
+
+Game::Game(DisplayWindow* display)
+{
+	Game::appDisplay = display;
+}
+
+HRESULT Game::Run()
+{
+	PrepareRecources();//инициализируем параметры
+	CreateBackBufer();//создаем задний буфер
+
+	//Initialize();//будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены
+	//for (auto comp : components) comp->Initialize();//далее пробегаемся по всем компонентам и вызываем у них инишеолайз в которых будут прочитаны шейдера и т.д
+
+	//настройки времени
+	
+	//-----------------------------------------------------------------------------
+	//CREATE WINDOW MESSAGE LOOP
+	//-----------------------------------------------------------------------------
+	MSG msg = {};
+
+	// Loop until there is a quit message from the window or the user.
+	bool isExitRequested = false;
+	while (!isExitRequested) {
+		// Handle the windows messages.
+		/*while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);*/
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		// If windows signals to end the application then exit out.
+		if (msg.message == WM_QUIT) {
+			isExitRequested = true;
+		}
+
+
+#pragma region DrawSomeStaff
+		Draw();//update internal
+		
+#pragma endregion DrawSomeStaff
+	}
+
+	DestroyRecources();
+	return 0;
+}
+
+//void Initialize()
+//{
+//	//создаем энное количество триангл компонентов и добовляем их в components 
+//	//будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены
+//	//затем пробигаем по всем компонентам и вызываем у них инишалайз
+//}
+
+HRESULT Game::PrepareRecources()
+{
+	HRESULT res; //сюда записывается результат проверок
+
+	//-----------------------------------------------------------------------------
+	//Установка параметров перед созданием устройства
+	//-----------------------------------------------------------------------------
+	//структура, описывающая цепь связи (свойства переднего буфера) параметры, по которым будет создаваться устройство
+	DXGI_SWAP_CHAIN_DESC swapDesc = {};
+	swapDesc.BufferCount = 2;//у нас 2 задних буфера(потому что у FLIP_DISCARD должно быть как минимум 2 буфера)
+	swapDesc.BufferDesc.Width = appDisplay->screenWidth;//ширина переднего буфера	
+	swapDesc.BufferDesc.Height = appDisplay->screenHeight;//высота переднего буфера
+	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//формат пикселя в буфере
+	swapDesc.BufferDesc.RefreshRate.Numerator = 60;//частота обновления экрана
+	swapDesc.BufferDesc.RefreshRate.Denominator = 1;//в секунду
+	swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;//подстройка буфера под окно
+	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;//назначение буфера - записывать в него все что мы посчитали
+	swapDesc.OutputWindow = appDisplay->hWnd;//привязка к нашему окну WinApi
+	swapDesc.Windowed = true;//не полноэкранный режим
+	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;//определяет, что происходит с содержимым бэк буфера после переключения
+	swapDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;//отвечает за возможность ресайза бэк буферов
+	swapDesc.SampleDesc.Count = 1; //отвечает за мультисэмплинг и зависит от параметра SwapEffect
+	swapDesc.SampleDesc.Quality = 0; //см. выше
+
+	D3D_FEATURE_LEVEL featureLevel[] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_11_1 }; //поддерживаемые фичи
+	//свапчейн отвечает за создание бэк буферов, которые хранят все то, что мы отрендерили и после present с бэкбуфера попадет на экран
+	res = D3D11CreateDeviceAndSwapChain(
+		nullptr,//default adapter
+		D3D_DRIVER_TYPE_HARDWARE,//videocard driver
+		nullptr,
+		D3D11_CREATE_DEVICE_DEBUG,
+		featureLevel,//11_0
+		1,
+		D3D11_SDK_VERSION,
+		&swapDesc,//параметры для свапчейна
+		&swapChain,//сам свапчейн
+		&device,//девайс
+		nullptr,//указатель на первый поддерживаемый элемент в массиве featureLefel
+		&context);//контекст устройства
+
+	ZCHECK(res);//проверка
+
+	swapChain->QueryInterface<IDXGISwapChain1>(&swapChain1);
+
+	context->QueryInterface(IID_ID3DUserDefinedAnnotation, (void**)&annotation);
+
+	ID3D11Debug* debug;
+	device->QueryInterface(IID_ID3D11Debug, (void**)&debug);
+
+	return 0;
+}
+
+HRESULT Game::CreateBackBufer()
+{
+	HRESULT res;
+
+	res = swapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&backBuffer);	//создаем буфер
+	ZCHECK(res);
+	res = device->CreateRenderTargetView(backBuffer, nullptr, &rtv);			// устанавливаем задний буфер как рендер таргет
+	ZCHECK(res);
+	return 0;
+}
+
+void Game::Draw()
+{
+	auto	curTime = std::chrono::steady_clock::now();//текущее время
+	float	deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(curTime - PrevTime).count() / 1000000.0f;//сколько времени прошло с предыдущего кадра
+	PrevTime = curTime;
+
+	totalTime += deltaTime;
+	frameCount++;//считаем, сколько времени прошло
+
+
+	if (totalTime > 1.0f) {
+		float fps = frameCount / totalTime;//считаем фпс
+
+		totalTime = 0.0f;
+
+		WCHAR text[256];
+		swprintf_s(text, TEXT("FPS: %f"), fps);
+		SetWindowText(appDisplay->hWnd, text); //выводим фпс вместо названия окошка
+
+		frameCount = 0;
+	}
+
+	//-----------------------------------------------------------------------------
+	//CLEAR BACKBUFER
+	//-----------------------------------------------------------------------------
+	float color[] = { totalTime, 0.1f, 0.1f, 1.0f };
+	//float color[] = { 0.1f, 0.1f, 0.1f, 1.0f };//цвет, которым мы очищаем рендер таргет вью
+	//D3D11_VIEWPORT viewport = {};//установка вьюпортов для rastState
+	//viewport.Width = static_cast<float>(display->screenWidth);
+	//viewport.Height = static_cast<float>(game->appDisplay->screenHeight);
+	//viewport.TopLeftX = 0;
+	//viewport.TopLeftY = 0;
+	//viewport.MinDepth = 0;
+	//viewport.MaxDepth = 1.0f;
+	//context->ClearState();//
+	context->OMSetRenderTargets(1, &rtv, nullptr);//так как у нас флип модель, надо это делать на каждом кадре//Подключаем объект заднего буфера к контексту устройства (очистка заднего буфера)
+
+	context->ClearRenderTargetView(rtv, color);//очистили цветом
+
+
+	//-----------------------------------------------------------------------------
+	//PRESENT RESULT
+	//-----------------------------------------------------------------------------
+	swapChain1->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
+}
+
+void Game::Update()
+{
+	//for (auto comp : components) comp->Update();
+}
+
+void Game::DestroyRecources()
+{
+	backBuffer->Release();
+	//-----------------------------------------------------------------------------
+	//CLEAN THE MESS
+	//-----------------------------------------------------------------------------
+	/*vertexShader->Release();
+	pixelShader->Release();
+
+	device->Release();
+
+	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+
+	return 0;*/
+}
