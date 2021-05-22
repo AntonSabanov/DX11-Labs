@@ -1,22 +1,51 @@
 #include "pch.h"
 #include "Game.h"
 #include "DisplayWindow.h"
+#include "TriangleComponent.h"
 
+using namespace DirectX;
 
-Game::Game(DisplayWindow* display)
+//Game::GetInstance()
+//{
+//	return Instance;
+//}
+
+Game::Game(DisplayWindow* display, std::string name)
 {
 	Game::appDisplay = display;
+	Game::name = name;
+	//Instance = this;
 }
 
-HRESULT Game::Run()
+//void Game::SetInstance(Game* gameObj)
+//{
+//	gameObj->Instance = gameObj;
+//}
+//
+//Game* Game::GetInstance()
+//{
+//	return Game::this->Instance;
+//}
+
+HRESULT Game::Run() //определение ресурсов и запуск цикла
 {
 	PrepareRecources();//инициализируем параметры
-	CreateBackBufer();//создаем задний буфер
 
+	std::vector<TriangleComponent*> triangles;
+	triangles.emplace_back(new TriangleComponent(device, context, { XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+																	XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+																	XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f),
+		}));
+	triangles.emplace_back(new TriangleComponent(device, context, { XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+																	XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет		
+																	XMFLOAT4(-0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		}));
+	
+
+	
 	//Initialize();//будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены
 	//for (auto comp : components) comp->Initialize();//далее пробегаемся по всем компонентам и вызываем у них инишеолайз в которых будут прочитаны шейдера и т.д
 
-	//настройки времени
 	
 	//-----------------------------------------------------------------------------
 	//CREATE WINDOW MESSAGE LOOP
@@ -42,7 +71,67 @@ HRESULT Game::Run()
 
 
 #pragma region DrawSomeStaff
-		Draw();//update internal
+		//Draw();//update internal
+
+#pragma region Preparef
+		auto	curTime = std::chrono::steady_clock::now();//текущее время
+		float	deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(curTime - PrevTime).count() / 1000000.0f;//сколько времени прошло с предыдущего кадра
+		PrevTime = curTime;
+
+		totalTime += deltaTime;
+		frameCount++;//считаем, сколько времени прошло
+
+		if (totalTime > 1.0f) {
+			float fps = frameCount / totalTime;//считаем фпс
+
+			totalTime = 0.0f;
+
+			WCHAR text[256];
+			swprintf_s(text, TEXT("FPS: %f"), fps);
+			SetWindowText(appDisplay->hWnd, text); //выводим фпс вместо названия окошка
+
+			frameCount = 0;
+		}
+
+		//-----------------------------------------------------------------------------
+		//CLEAR BACKBUFER
+		//-----------------------------------------------------------------------------
+		float color[] = { totalTime, 0.1f, 0.1f, 1.0f };
+		//float color[] = { 0.1f, 0.1f, 0.1f, 1.0f };//цвет, которым мы очищаем рендер таргет вью
+
+		context->OMSetRenderTargets(1, &rtv, nullptr);//так как у нас флип модель, надо это делать на каждом кадре//Подключаем объект заднего буфера к контексту устройства (очистка заднего буфера)
+		context->ClearRenderTargetView(rtv, color);//очистили цветом
+#pragma endregion PrepareFrame
+
+#pragma region Draw
+		D3D11_VIEWPORT viewport = {};
+		viewport.Width = static_cast<float>(appDisplay->screenWidth);
+		viewport.Height = static_cast<float>(appDisplay->screenHeight);
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.MinDepth = 0;
+		viewport.MaxDepth = 1.0f;
+
+		context->RSSetViewports(1, &viewport);
+		context->OMSetRenderTargets(1, &rtv, nullptr);
+
+		annotation->BeginEvent(L"BeginDraw");
+		//context_->DrawIndexed(6, 0, 0);
+
+		for (auto&& i : triangles) 
+		{
+			i->Draw(context);
+		}
+		annotation->EndEvent();
+
+#pragma endregion Draw
+		//comp->Draw(context);
+
+		//-----------------------------------------------------------------------------
+		//PRESENT RESULT
+		//-----------------------------------------------------------------------------
+	//EndFrame
+		swapChain1->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
 		
 #pragma endregion DrawSomeStaff
 	}
@@ -98,15 +187,30 @@ HRESULT Game::PrepareRecources()
 		&device,//девайс
 		nullptr,//указатель на первый поддерживаемый элемент в массиве featureLefel
 		&context);//контекст устройства
-
 	ZCHECK(res);//проверка
+
+	CreateBackBufer();//создаем задний буфер
 
 	swapChain->QueryInterface<IDXGISwapChain1>(&swapChain1);
 
 	context->QueryInterface(IID_ID3DUserDefinedAnnotation, (void**)&annotation);
-
+	
 	ID3D11Debug* debug;
 	device->QueryInterface(IID_ID3D11Debug, (void**)&debug);
+
+	D3D11_VIEWPORT viewport = {};
+	viewport.Width = static_cast<float>(appDisplay->screenWidth);
+	viewport.Height = static_cast<float>(appDisplay->screenHeight);
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.MinDepth = 0;
+	viewport.MaxDepth = 1.0f;
+
+	context->RSSetViewports(1, &viewport);
+	context->OMSetRenderTargets(1, &rtv, nullptr);
+
+	/*ID3D11Debug* debug;
+	device->QueryInterface(IID_ID3D11Debug, (void**)&debug);*/
 
 	return 0;
 }
@@ -124,6 +228,10 @@ HRESULT Game::CreateBackBufer()
 
 void Game::Draw()
 {
+	//TriangleComponent* comp = new TriangleComponent();
+	//comp->Initialize(device, context);
+	//components = { comp };
+#pragma region PrepareFrame
 	auto	curTime = std::chrono::steady_clock::now();//текущее время
 	float	deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(curTime - PrevTime).count() / 1000000.0f;//сколько времени прошло с предыдущего кадра
 	PrevTime = curTime;
@@ -158,24 +266,59 @@ void Game::Draw()
 	//viewport.MaxDepth = 1.0f;
 	//context->ClearState();//
 	context->OMSetRenderTargets(1, &rtv, nullptr);//так как у нас флип модель, надо это делать на каждом кадре//Подключаем объект заднего буфера к контексту устройства (очистка заднего буфера)
-
 	context->ClearRenderTargetView(rtv, color);//очистили цветом
+#pragma endregion PrepareFrame
 
+#pragma region Draw
+	D3D11_VIEWPORT viewport = {};
+	viewport.Width = static_cast<float>(appDisplay->screenWidth);
+	viewport.Height = static_cast<float>(appDisplay->screenHeight);
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.MinDepth = 0;
+	viewport.MaxDepth = 1.0f;
+
+	context->RSSetViewports(1, &viewport);
+	context->OMSetRenderTargets(1, &rtv, nullptr);
+
+	annotation->BeginEvent(L"BeginDraw");
+	//context_->DrawIndexed(6, 0, 0);
+
+	//for (auto&& i : components) 
+	//{
+	//	i->Draw(context);
+	//}
+	annotation->EndEvent();
+	
+#pragma endregion Draw
+	//comp->Draw(context);
 
 	//-----------------------------------------------------------------------------
 	//PRESENT RESULT
 	//-----------------------------------------------------------------------------
+//EndFrame
 	swapChain1->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
 }
 
-void Game::Update()
-{
-	//for (auto comp : components) comp->Update();
-}
+//void Game::Update()
+//{
+//	//for (auto comp : components) comp->Update();
+//}
 
 void Game::DestroyRecources()
 {
 	backBuffer->Release();
+	if (context) context->ClearState();
+	//if (_constantBuffer) _constantBuffer->Release();
+	//if (vertexBuffer) vertexBuffer->Release();
+	//if (indexBuffer) indexBuffer->Release();
+	/*for (auto c : Components)
+	{
+		c->DestroyResources();
+	}*/
+	if (rtv) rtv->Release();
+	if (context) context->Release();
+	if (device) device->Release();
 	//-----------------------------------------------------------------------------
 	//CLEAN THE MESS
 	//-----------------------------------------------------------------------------

@@ -108,9 +108,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	//----------------------------------------------------------------
 	//CREATE A FORM
 	//----------------------------------------------------------------	
+	//std::vector<GameComponent*> components;
 	DisplayWindow* display = new DisplayWindow(800, 800);
 
-	Game* game = new Game(display);
+	Game* game = new Game(display, "DX11 Framework");
+	//Game::SetInstance(game);
+	//std::cout << Game::Instance->name << std::endl;
 	game->Run();
 
 }
