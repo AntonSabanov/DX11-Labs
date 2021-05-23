@@ -10,11 +10,12 @@ class Game
 //private:
 //	Game* Instance;
 public:
-	std::vector<GameComponent*> components;
+	std::vector<GameComponent*> triangles;
 	//TriangleComponent sas[8];
 	//Game* Instance;
 	std::string name;
 	DisplayWindow* appDisplay = nullptr;//окно приложения
+	D3D11_VIEWPORT viewport = {};
 	ID3D11Texture2D* backBuffer = nullptr; //задний буфер в виде текстуры										//?
 	ID3D11DeviceContext* context = nullptr;//рисование
 	ID3DUserDefinedAnnotation* annotation = nullptr; // debug annotation
@@ -38,7 +39,7 @@ public:
 	//static void SetInstance(Game* gameObj);
 	//static Game* GetInstance();
 	HRESULT Run();
-	//virtual void Initialize(); //создаем энное количество триангл компонентов и добовляем их в components //будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены//затем пробигаем по всем компонентам и вызываем у них инишалайз
+	virtual void Initialize(); //создаем энное количество триангл компонентов и добовляем их в components //будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены//затем пробигаем по всем компонентам и вызываем у них инишалайз
 	virtual HRESULT PrepareRecources();
 	HRESULT CreateBackBufer();
 	virtual void Draw(); // пробегает по всем компонентам и вызывает у них метод draw

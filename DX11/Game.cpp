@@ -30,22 +30,10 @@ Game::Game(DisplayWindow* display, std::string name)
 HRESULT Game::Run() //определение ресурсов и запуск цикла
 {
 	PrepareRecources();//инициализируем параметры
-
-	std::vector<TriangleComponent*> triangles;
-	triangles.emplace_back(new TriangleComponent(device, context, { XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
-																	XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
-																	XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f),
-		}));
-	triangles.emplace_back(new TriangleComponent(device, context, { XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
-																	XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет		
-																	XMFLOAT4(-0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		}));
-	
-
+	Initialize();//инициалзируем точки
 	
 	//Initialize();//будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены
 	//for (auto comp : components) comp->Initialize();//далее пробегаемся по всем компонентам и вызываем у них инишеолайз в которых будут прочитаны шейдера и т.д
-
 	
 	//-----------------------------------------------------------------------------
 	//CREATE WINDOW MESSAGE LOOP
@@ -71,81 +59,36 @@ HRESULT Game::Run() //определение ресурсов и запуск цикла
 
 
 #pragma region DrawSomeStaff
-		//Draw();//update internal
+		Draw();//update internal
 
-#pragma region Preparef
-		auto	curTime = std::chrono::steady_clock::now();//текущее время
-		float	deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(curTime - PrevTime).count() / 1000000.0f;//сколько времени прошло с предыдущего кадра
-		PrevTime = curTime;
-
-		totalTime += deltaTime;
-		frameCount++;//считаем, сколько времени прошло
-
-		if (totalTime > 1.0f) {
-			float fps = frameCount / totalTime;//считаем фпс
-
-			totalTime = 0.0f;
-
-			WCHAR text[256];
-			swprintf_s(text, TEXT("FPS: %f"), fps);
-			SetWindowText(appDisplay->hWnd, text); //выводим фпс вместо названия окошка
-
-			frameCount = 0;
-		}
-
-		//-----------------------------------------------------------------------------
-		//CLEAR BACKBUFER
-		//-----------------------------------------------------------------------------
-		float color[] = { totalTime, 0.1f, 0.1f, 1.0f };
-		//float color[] = { 0.1f, 0.1f, 0.1f, 1.0f };//цвет, которым мы очищаем рендер таргет вью
-
-		context->OMSetRenderTargets(1, &rtv, nullptr);//так как у нас флип модель, надо это делать на каждом кадре//Подключаем объект заднего буфера к контексту устройства (очистка заднего буфера)
-		context->ClearRenderTargetView(rtv, color);//очистили цветом
-#pragma endregion PrepareFrame
-
-#pragma region Draw
-		D3D11_VIEWPORT viewport = {};
-		viewport.Width = static_cast<float>(appDisplay->screenWidth);
-		viewport.Height = static_cast<float>(appDisplay->screenHeight);
-		viewport.TopLeftX = 0;
-		viewport.TopLeftY = 0;
-		viewport.MinDepth = 0;
-		viewport.MaxDepth = 1.0f;
-
-		context->RSSetViewports(1, &viewport);
-		context->OMSetRenderTargets(1, &rtv, nullptr);
-
-		annotation->BeginEvent(L"BeginDraw");
-		//context_->DrawIndexed(6, 0, 0);
-
-		for (auto&& i : triangles) 
-		{
-			i->Draw(context);
-		}
-		annotation->EndEvent();
-
-#pragma endregion Draw
-		//comp->Draw(context);
-
-		//-----------------------------------------------------------------------------
-		//PRESENT RESULT
-		//-----------------------------------------------------------------------------
-	//EndFrame
-		swapChain1->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
-		
-#pragma endregion DrawSomeStaff
 	}
 
 	DestroyRecources();
 	return 0;
 }
 
-//void Initialize()
-//{
-//	//создаем энное количество триангл компонентов и добовляем их в components 
-//	//будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены
-//	//затем пробигаем по всем компонентам и вызываем у них инишалайз
-//}
+void Game::Initialize()
+{
+	triangles.emplace_back(new TriangleComponent(device, context, 
+		{ XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+		XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+		XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f),
+		XMFLOAT4(-0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		}));
+
+	//triangles.emplace_back(new TriangleComponent(device, context, { XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+	//															XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+	//															XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f),
+	//	}));
+	//triangles.emplace_back(new TriangleComponent(device, context, { XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+	//																XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет		
+	//																XMFLOAT4(-0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+	//	}));
+	
+	//создаем энное количество триангл компонентов и добовляем их в components 
+	//будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены
+	//затем пробигаем по всем компонентам и вызываем у них инишалайз
+}
 
 HRESULT Game::PrepareRecources()
 {
@@ -198,7 +141,7 @@ HRESULT Game::PrepareRecources()
 	ID3D11Debug* debug;
 	device->QueryInterface(IID_ID3D11Debug, (void**)&debug);
 
-	D3D11_VIEWPORT viewport = {};
+	//D3D11_VIEWPORT viewport = {};
 	viewport.Width = static_cast<float>(appDisplay->screenWidth);
 	viewport.Height = static_cast<float>(appDisplay->screenHeight);
 	viewport.TopLeftX = 0;
@@ -228,9 +171,6 @@ HRESULT Game::CreateBackBufer()
 
 void Game::Draw()
 {
-	//TriangleComponent* comp = new TriangleComponent();
-	//comp->Initialize(device, context);
-	//components = { comp };
 #pragma region PrepareFrame
 	auto	curTime = std::chrono::steady_clock::now();//текущее время
 	float	deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(curTime - PrevTime).count() / 1000000.0f;//сколько времени прошло с предыдущего кадра
@@ -238,7 +178,6 @@ void Game::Draw()
 
 	totalTime += deltaTime;
 	frameCount++;//считаем, сколько времени прошло
-
 
 	if (totalTime > 1.0f) {
 		float fps = frameCount / totalTime;//считаем фпс
@@ -257,42 +196,26 @@ void Game::Draw()
 	//-----------------------------------------------------------------------------
 	float color[] = { totalTime, 0.1f, 0.1f, 1.0f };
 	//float color[] = { 0.1f, 0.1f, 0.1f, 1.0f };//цвет, которым мы очищаем рендер таргет вью
-	//D3D11_VIEWPORT viewport = {};//установка вьюпортов для rastState
-	//viewport.Width = static_cast<float>(display->screenWidth);
-	//viewport.Height = static_cast<float>(game->appDisplay->screenHeight);
-	//viewport.TopLeftX = 0;
-	//viewport.TopLeftY = 0;
-	//viewport.MinDepth = 0;
-	//viewport.MaxDepth = 1.0f;
-	//context->ClearState();//
+	
 	context->OMSetRenderTargets(1, &rtv, nullptr);//так как у нас флип модель, надо это делать на каждом кадре//Подключаем объект заднего буфера к контексту устройства (очистка заднего буфера)
 	context->ClearRenderTargetView(rtv, color);//очистили цветом
 #pragma endregion PrepareFrame
 
 #pragma region Draw
-	D3D11_VIEWPORT viewport = {};
-	viewport.Width = static_cast<float>(appDisplay->screenWidth);
-	viewport.Height = static_cast<float>(appDisplay->screenHeight);
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.MinDepth = 0;
-	viewport.MaxDepth = 1.0f;
 
 	context->RSSetViewports(1, &viewport);
-	context->OMSetRenderTargets(1, &rtv, nullptr);
+	//context->OMSetRenderTargets(1, &rtv, nullptr);
 
 	annotation->BeginEvent(L"BeginDraw");
 	//context_->DrawIndexed(6, 0, 0);
 
-	//for (auto&& i : components) 
-	//{
-	//	i->Draw(context);
-	//}
+	for (auto&& i : triangles)
+	{
+		i->Draw(context);
+	}
 	annotation->EndEvent();
 	
 #pragma endregion Draw
-	//comp->Draw(context);
-
 	//-----------------------------------------------------------------------------
 	//PRESENT RESULT
 	//-----------------------------------------------------------------------------
@@ -312,22 +235,17 @@ void Game::DestroyRecources()
 	//if (_constantBuffer) _constantBuffer->Release();
 	//if (vertexBuffer) vertexBuffer->Release();
 	//if (indexBuffer) indexBuffer->Release();
-	/*for (auto c : Components)
+	for (auto c : triangles)
 	{
 		c->DestroyResources();
-	}*/
+	}
 	if (rtv) rtv->Release();
 	if (context) context->Release();
 	if (device) device->Release();
 	//-----------------------------------------------------------------------------
 	//CLEAN THE MESS
 	//-----------------------------------------------------------------------------
-	/*vertexShader->Release();
-	pixelShader->Release();
 
-	device->Release();
 
-	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
-
-	return 0;*/
+	//debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 }
