@@ -1,4 +1,7 @@
 #include "GameTransform.h"
+#include "SimpleMath.h"
+
+using namespace DirectX::SimpleMath;
 
 void GameTransform::Initialize()
 {

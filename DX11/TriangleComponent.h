@@ -4,11 +4,15 @@
 
 #include "Camera.h"//
 
+#include "SimpleMath.h"
+
+using namespace DirectX::SimpleMath;
+
 
 class TriangleComponent : public GameComponent
 {
 public:
-	std::vector<DirectX::XMFLOAT4> triangleObjPoints; //список координат точек объекта
+	std::vector<Vector4> triangleObjPoints; //список координат точек объекта
 
 	ID3D11InputLayout* layout;
 	ID3D11VertexShader* vertexShader;
@@ -26,12 +30,12 @@ public:
 	//position//позиция самого объекта
 
 public:
-	TriangleComponent(Microsoft::WRL::ComPtr<ID3D11Device> device, 
+	TriangleComponent(ID3D11Device* device,
 						ID3D11DeviceContext* context, 
-						std::vector<DirectX::XMFLOAT4> points, 
+						std::vector<Vector4> points,
 						Camera* camera);
 
-	HRESULT Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, ID3D11DeviceContext* context) override;
+	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;
 
 	void Draw(ID3D11DeviceContext* context) override;
 	
@@ -40,8 +44,8 @@ public:
 	void DestroyResources() override;
 
 private:
-	HRESULT CreateShaders(Microsoft::WRL::ComPtr<ID3D11Device> device);
-	HRESULT CreateLayout(Microsoft::WRL::ComPtr<ID3D11Device> device);
-	HRESULT CreateBufers(Microsoft::WRL::ComPtr<ID3D11Device> device);
+	HRESULT CreateShaders(ID3D11Device* device);
+	HRESULT CreateLayout(ID3D11Device* device);
+	HRESULT CreateBufers(ID3D11Device* device);
 };
 

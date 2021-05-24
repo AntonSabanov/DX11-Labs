@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "TriangleComponent.h"
+#include "SimpleMath.h"
 
+using namespace DirectX::SimpleMath;
 using namespace DirectX;
 
-TriangleComponent::TriangleComponent(Microsoft::WRL::ComPtr<ID3D11Device> device, ID3D11DeviceContext* context, std::vector<DirectX::XMFLOAT4> points, Camera* camera)
+TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* context, std::vector<Vector4> points, Camera* camera)
 {
 	//game = gameObj;
 	for (size_t i = 0; i < points.size(); ++i) 
@@ -15,7 +17,7 @@ TriangleComponent::TriangleComponent(Microsoft::WRL::ComPtr<ID3D11Device> device
 	Initialize(device, context);
 }
 
-HRESULT TriangleComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, ID3D11DeviceContext* context)
+HRESULT TriangleComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext* context)
 {
 	HRESULT res;
 
@@ -63,7 +65,7 @@ HRESULT TriangleComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> devic
 	return 0;
 }
 
-HRESULT TriangleComponent::CreateShaders(Microsoft::WRL::ComPtr<ID3D11Device> device)
+HRESULT TriangleComponent::CreateShaders(ID3D11Device* device)
 {
 	HRESULT res;
 
@@ -137,7 +139,7 @@ HRESULT TriangleComponent::CreateShaders(Microsoft::WRL::ComPtr<ID3D11Device> de
 	return 0;
 }
 
-HRESULT TriangleComponent::CreateLayout(Microsoft::WRL::ComPtr<ID3D11Device> device)
+HRESULT TriangleComponent::CreateLayout(ID3D11Device* device)
 {
 	HRESULT res;
 	//-----------------------------------------------------------------------------
@@ -175,7 +177,7 @@ HRESULT TriangleComponent::CreateLayout(Microsoft::WRL::ComPtr<ID3D11Device> dev
 	return 0;
 }
 
-HRESULT TriangleComponent::CreateBufers(Microsoft::WRL::ComPtr<ID3D11Device> device)
+HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 {
 	HRESULT res;
 
@@ -186,7 +188,7 @@ HRESULT TriangleComponent::CreateBufers(Microsoft::WRL::ComPtr<ID3D11Device> dev
 	//int indeces[] = {0, 1, 2};//массив индексов
 
 	D3D11_BUFFER_DESC vertexBufDesc = {};
-	vertexBufDesc.ByteWidth = sizeof(XMFLOAT4) * std::size(triangleObjPoints);//размер буфера в байтах
+	vertexBufDesc.ByteWidth = sizeof(Vector4) * std::size(triangleObjPoints);//размер буфера в байтах
 	vertexBufDesc.Usage = D3D11_USAGE_DEFAULT; // то, как часто будет обновляться вершинный буфер
 	vertexBufDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER; //куда буфер может быть привязан
 	vertexBufDesc.CPUAccessFlags = 0; //0 -если не хотим чтения и записи с цпу
@@ -217,13 +219,17 @@ HRESULT TriangleComponent::CreateBufers(Microsoft::WRL::ComPtr<ID3D11Device> dev
 	res = device->CreateBuffer(&indexBufDesc, &indexData, &indexBuffer);
 	ZCHECK(res);
 
-	//D3D11_BUFFER_DESC constBufDesc = {};
-	//indexBufDesc.ByteWidth = sizeof(D3DMATRIX);
-	//indexBufDesc.Usage = D3D11_USAGE_DEFAULT;
-	//indexBufDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	//indexBufDesc.CPUAccessFlags = 0;
-	//indexBufDesc.MiscFlags = 0;
-	//indexBufDesc.StructureByteStride = 0;
+	//создаем константный буфер
+	D3D11_BUFFER_DESC constBufDesc = {};
+	indexBufDesc.ByteWidth = sizeof(D3DMATRIX);
+	indexBufDesc.Usage = D3D11_USAGE_DYNAMIC;
+	indexBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	indexBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	indexBufDesc.MiscFlags = 0;
+	indexBufDesc.StructureByteStride = 0;
+
+	res = device->CreateBuffer(&constBufDesc, nullptr, &constantBuffer);
+	ZCHECK(res);
 
 	return 0;
 }
@@ -263,5 +269,7 @@ void TriangleComponent::DestroyResources()
 
 void TriangleComponent::Update(float deltaTime)
 {
+	//auto wvp = Matrix::CreateTranslation(Position) * gameCamera->viewMatrix * gameCamera->projectionMatrix;
+
 
 }

@@ -19,9 +19,8 @@ public:
 	ID3D11Texture2D* backBuffer = nullptr; //задний буфер в виде текстуры										//?
 	ID3D11DeviceContext* context = nullptr;//рисование
 	ID3DUserDefinedAnnotation* annotation = nullptr; // debug annotation
-	Microsoft::WRL::ComPtr<ID3D11Device> device;//девайс
+	ID3D11Device* device;//девайс Microsoft::WRL::ComPtr<ID3D11Device>
 	////Instance
-	////Name
 	std::chrono::time_point<std::chrono::steady_clock> PrevTime;
 	////RenderSRV
 	ID3D11RenderTargetView* rtv = nullptr;//объект заднего буфера, в который будем рисовать //RenderView		//?
