@@ -10,7 +10,7 @@ class Game
 //private:
 //	Game* Instance;
 public:
-	std::vector<GameComponent*> triangles;
+	std::vector<GameComponent*> trianglObjects;
 	//TriangleComponent sas[8];
 	//Game* Instance;
 	std::string name;
@@ -45,7 +45,7 @@ public:
 	virtual void Draw(); // пробегает по всем компонентам и вызывает у них метод draw
 	virtual void DestroyRecources();
 	
-	//virtual void Update();// пробегает по всем компонентам и вызывает у них метод апдейт
+	virtual void Update(float deltaTime);// пробегает по всем компонентам и вызывает у них метод апдейт
 
 
 };

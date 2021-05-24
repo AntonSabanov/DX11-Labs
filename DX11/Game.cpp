@@ -69,18 +69,19 @@ HRESULT Game::Run() //определение ресурсов и запуск цикла
 
 void Game::Initialize()
 {
-	triangles.emplace_back(new TriangleComponent(device, context, 
+	trianglObjects.emplace_back(new TriangleComponent(device, context, 
 		{ XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
 		XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
 		XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f),
 		XMFLOAT4(-0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		}));
+		}, 
+		nullptr));//камера пока что nullptr
 
-	//triangles.emplace_back(new TriangleComponent(device, context, { XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+	//trianglObjects.emplace_back(new TriangleComponent(device, context, { XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
 	//															XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
 	//															XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f),
 	//	}));
-	//triangles.emplace_back(new TriangleComponent(device, context, { XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+	//trianglObjects.emplace_back(new TriangleComponent(device, context, { XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
 	//																XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет		
 	//																XMFLOAT4(-0.5f, 0.5f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 	//	}));
@@ -209,7 +210,7 @@ void Game::Draw()
 	annotation->BeginEvent(L"BeginDraw");
 	//context_->DrawIndexed(6, 0, 0);
 
-	for (auto&& i : triangles)
+	for (auto&& i : trianglObjects)
 	{
 		i->Draw(context);
 	}
@@ -223,10 +224,10 @@ void Game::Draw()
 	swapChain1->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
 }
 
-//void Game::Update()
-//{
-//	//for (auto comp : components) comp->Update();
-//}
+void Game::Update(float deltaTime)
+{
+	//for (auto comp : components) comp->Update();
+}
 
 void Game::DestroyRecources()
 {
@@ -235,7 +236,7 @@ void Game::DestroyRecources()
 	//if (_constantBuffer) _constantBuffer->Release();
 	//if (vertexBuffer) vertexBuffer->Release();
 	//if (indexBuffer) indexBuffer->Release();
-	for (auto c : triangles)
+	for (auto c : trianglObjects)
 	{
 		c->DestroyResources();
 	}

@@ -3,13 +3,15 @@
 
 using namespace DirectX;
 
-TriangleComponent::TriangleComponent(Microsoft::WRL::ComPtr<ID3D11Device> device, ID3D11DeviceContext* context, std::vector<DirectX::XMFLOAT4> points)
+TriangleComponent::TriangleComponent(Microsoft::WRL::ComPtr<ID3D11Device> device, ID3D11DeviceContext* context, std::vector<DirectX::XMFLOAT4> points, Camera* camera)
 {
 	//game = gameObj;
 	for (size_t i = 0; i < points.size(); ++i) 
 	{
-		trianglePoints.emplace_back(points[i]);
+		triangleObjPoints.emplace_back(points[i]);
 	}
+	gameCamera = camera;
+	//position = //установка позиции объекта
 	Initialize(device, context);
 }
 
@@ -135,51 +137,6 @@ HRESULT TriangleComponent::CreateShaders(Microsoft::WRL::ComPtr<ID3D11Device> de
 	return 0;
 }
 
-HRESULT TriangleComponent::CreateBufers(Microsoft::WRL::ComPtr<ID3D11Device> device)
-{
-	HRESULT res;
-
-	//-----------------------------------------------------------------------------
-	//CREATE VERTEX AND INDEX (OPTIONAL) BUFFERS
-	//-----------------------------------------------------------------------------
-	int indeces[] = { 0,1,2, 1,0,3 };//массив индексов
-	//int indeces[] = {0, 1, 2};//массив индексов
-
-	D3D11_BUFFER_DESC vertexBufDesc = {};
-	vertexBufDesc.ByteWidth = sizeof(XMFLOAT4) * std::size(trianglePoints);//размер буфера в байтах
-	vertexBufDesc.Usage = D3D11_USAGE_DEFAULT; // то, как часто будет обновляться вершинный буфер
-	vertexBufDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER; //куда буфер может быть привязан
-	vertexBufDesc.CPUAccessFlags = 0; //0 -если не хотим чтения и записи с цпу
-	vertexBufDesc.MiscFlags = 0;
-	vertexBufDesc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA vertexData = {};
-	vertexData.pSysMem = trianglePoints.data();
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
-
-	res = device->CreateBuffer(&vertexBufDesc, &vertexData, &vertexBuffer);
-	ZCHECK(res);
-
-	D3D11_BUFFER_DESC indexBufDesc = {};
-	indexBufDesc.ByteWidth = sizeof(int) * std::size(indeces);
-	indexBufDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufDesc.CPUAccessFlags = 0;
-	indexBufDesc.MiscFlags = 0;
-	indexBufDesc.StructureByteStride = 0;	
-
-	D3D11_SUBRESOURCE_DATA indexData = {};
-	indexData.pSysMem = indeces;
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
-
-	res = device->CreateBuffer(&indexBufDesc, &indexData, &indexBuffer);
-	ZCHECK(res);
-
-	return 0;
-}
-
 HRESULT TriangleComponent::CreateLayout(Microsoft::WRL::ComPtr<ID3D11Device> device)
 {
 	HRESULT res;
@@ -218,6 +175,59 @@ HRESULT TriangleComponent::CreateLayout(Microsoft::WRL::ComPtr<ID3D11Device> dev
 	return 0;
 }
 
+HRESULT TriangleComponent::CreateBufers(Microsoft::WRL::ComPtr<ID3D11Device> device)
+{
+	HRESULT res;
+
+	//-----------------------------------------------------------------------------
+	//CREATE VERTEX AND INDEX (OPTIONAL) BUFFERS
+	//-----------------------------------------------------------------------------
+	int indeces[] = { 0,1,2, 1,0,3 };//массив индексов
+	//int indeces[] = {0, 1, 2};//массив индексов
+
+	D3D11_BUFFER_DESC vertexBufDesc = {};
+	vertexBufDesc.ByteWidth = sizeof(XMFLOAT4) * std::size(triangleObjPoints);//размер буфера в байтах
+	vertexBufDesc.Usage = D3D11_USAGE_DEFAULT; // то, как часто будет обновляться вершинный буфер
+	vertexBufDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER; //куда буфер может быть привязан
+	vertexBufDesc.CPUAccessFlags = 0; //0 -если не хотим чтения и записи с цпу
+	vertexBufDesc.MiscFlags = 0;
+	vertexBufDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA vertexData = {};
+	vertexData.pSysMem = triangleObjPoints.data();
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	res = device->CreateBuffer(&vertexBufDesc, &vertexData, &vertexBuffer);
+	ZCHECK(res);
+
+	D3D11_BUFFER_DESC indexBufDesc = {};
+	indexBufDesc.ByteWidth = sizeof(int) * std::size(indeces);
+	indexBufDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufDesc.CPUAccessFlags = 0;
+	indexBufDesc.MiscFlags = 0;
+	indexBufDesc.StructureByteStride = 0;	
+
+	D3D11_SUBRESOURCE_DATA indexData = {};
+	indexData.pSysMem = indeces;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	res = device->CreateBuffer(&indexBufDesc, &indexData, &indexBuffer);
+	ZCHECK(res);
+
+	//D3D11_BUFFER_DESC constBufDesc = {};
+	//indexBufDesc.ByteWidth = sizeof(D3DMATRIX);
+	//indexBufDesc.Usage = D3D11_USAGE_DEFAULT;
+	//indexBufDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	//indexBufDesc.CPUAccessFlags = 0;
+	//indexBufDesc.MiscFlags = 0;
+	//indexBufDesc.StructureByteStride = 0;
+
+	return 0;
+}
+
 void TriangleComponent::Draw(ID3D11DeviceContext* context)
 {
 	UINT strides = 32;
@@ -249,4 +259,9 @@ void TriangleComponent::DestroyResources()
 	if (layout) layout->Release();
 	if (vertexShader) vertexShader->Release();
 	if (pixelShader) pixelShader->Release();
+}
+
+void TriangleComponent::Update(float deltaTime)
+{
+
 }
