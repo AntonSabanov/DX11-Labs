@@ -25,6 +25,7 @@
 
 #include "DisplayWindow.h"
 #include "Game.h"
+#include "InputDevice.h"
 
 #define ZCHECK(exp)                                                        \
     if (FAILED(exp)) {                                                     \
@@ -52,6 +53,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	DisplayWindow* display = new DisplayWindow(800, 800);
 
 	Game* game = new Game(display, "DX11 Framework");
+	InputDevice* inputDevice = new InputDevice(game);
+	game->inputDevice = inputDevice;
+	//display->inDevice = inputDevice;
 	game->Run();
 
 }

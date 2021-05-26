@@ -12,8 +12,10 @@ TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* 
 	{
 		triangleObjPoints.emplace_back(points[i]);
 	}
+	//TriangleComponent::context = context;
 	gameCamera = camera;
-	//position = //установка позиции объекта
+	objectPosition = Vector3::Zero;//установка позиции объекта
+
 	Initialize(device, context);
 }
 
@@ -44,24 +46,7 @@ HRESULT TriangleComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext*
 	res = device->CreateRasterizerState(&rastDesc, &rastState);
 	ZCHECK(res);
 
-	//context->RSSetState(rastState);
-	//
-	//// создаем и настраиваем вьюпорт
-	//D3D11_VIEWPORT viewport = {};//установка вьюпортов для rastState
-	//viewport.Width = static_cast<float>(game->appDisplay->screenWidth);
-	//viewport.Height = static_cast<float>(game->appDisplay->screenHeight);
-	//viewport.TopLeftX = 0;
-	//viewport.TopLeftY = 0;
-	//viewport.MinDepth = 0;
-	//viewport.MaxDepth = 1.0f;
-	//
-	//context->RSSetViewports(1, &viewport);// Подключаем вьюпорт к контексту устройства
-	//
-	////-----------------------------------------------------------------------------
-	////SETUP BACKBUFER FOR OUTPUT
-	////-----------------------------------------------------------------------------
-	////зачем два раза устанавливается?
-	//context->OMSetRenderTargets(1, &(game->rtv), nullptr);// Подключаем объект заднего буфера к контексту устройства (если стоит FLIP эффект, то надо вызывать на каждом кадре)
+	
 	return 0;
 }
 
@@ -221,7 +206,7 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 
 	//создаем константный буфер
 	D3D11_BUFFER_DESC constBufDesc = {};
-	indexBufDesc.ByteWidth = sizeof(D3DMATRIX);
+	indexBufDesc.ByteWidth = sizeof(Matrix);
 	indexBufDesc.Usage = D3D11_USAGE_DYNAMIC;
 	indexBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	indexBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -244,6 +229,8 @@ void TriangleComponent::Draw(ID3D11DeviceContext* context)
 	context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);//выставляем индексный буфер
 	context->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);//выставляем вершинный буфер
 
+	context->VSSetConstantBuffers(0, 1, &constantBuffer);//выставляем константный буфер
+
 	//-----------------------------------------------------------------------------
 	//SET VERTEX AND PIXEL SHADERS
 	//-----------------------------------------------------------------------------
@@ -256,6 +243,7 @@ void TriangleComponent::Draw(ID3D11DeviceContext* context)
 	 
 	//context->DrawIndexed(3, 0, 0);
 	context->DrawIndexed(6, 0, 0);
+	//context->DrawAuto();
 
 	//annotation->EndEvent();
 }
@@ -269,7 +257,13 @@ void TriangleComponent::DestroyResources()
 
 void TriangleComponent::Update(float deltaTime)
 {
-	//auto wvp = Matrix::CreateTranslation(Position) * gameCamera->viewMatrix * gameCamera->projectionMatrix;
+	auto wvp = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//
 
+	D3D11_MAPPED_SUBRESOURCE res = {};
+	context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
 
+	auto dataPtr = reinterpret_cast<float*>(res.pData);
+	memcpy(dataPtr, &wvp, sizeof(Matrix));
+
+	context->Unmap(constantBuffer, 0);
 }

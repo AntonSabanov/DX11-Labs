@@ -24,9 +24,6 @@
     <ClCompile Include="Game.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="TriangleComponent.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="InputDevice.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -37,6 +34,15 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="CameraController.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="GridComponent.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="TriangleComponent.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Delegates.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,8 +74,22 @@
     <ClInclude Include="CameraController.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="GridComponent.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Keys.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Delegates.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="Delegates.natvis">
+      <Filter>Файлы ресурсов</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>

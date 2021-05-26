@@ -12,22 +12,24 @@ using namespace DirectX::SimpleMath;
 class TriangleComponent : public GameComponent
 {
 public:
+	ID3D11DeviceContext* context;
+
 	std::vector<Vector4> triangleObjPoints; //список координат точек объекта
 
-	ID3D11InputLayout* layout;
-	ID3D11VertexShader* vertexShader;
-	ID3D11PixelShader* pixelShader;
-	ID3DBlob* vertexBC; //скомпилированный вершинный шейдер помещается сюда
-	ID3DBlob* pixelBC; //место в памяти под пиксельный шейдер
-	ID3D11Buffer* vertexBuffer; //vertices
-	ID3D11Buffer* indexBuffer;
-	ID3D11RasterizerState* rastState;
+	ID3D11InputLayout* layout = nullptr;
+	ID3D11VertexShader* vertexShader = nullptr;
+	ID3D11PixelShader* pixelShader = nullptr;
+	ID3DBlob* vertexBC = nullptr; //скомпилированный вершинный шейдер помещается сюда
+	ID3DBlob* pixelBC = nullptr; //место в памяти под пиксельный шейдер
+	ID3D11Buffer* vertexBuffer = nullptr; //vertices
+	ID3D11Buffer* indexBuffer = nullptr;
+	ID3D11RasterizerState* rastState = nullptr;
 	//ID3DUserDefinedAnnotation* annotation = nullptr;
 
-	ID3D11Buffer* constantBuffer;//константный буфер
+	ID3D11Buffer* constantBuffer = nullptr;//константный буфер
 	Camera* gameCamera = nullptr;//от сюда будем получать матрицы вида и проекции
 
-	//position//позиция самого объекта
+	Vector3 objectPosition;//позиция самого объекта
 
 public:
 	TriangleComponent(ID3D11Device* device,

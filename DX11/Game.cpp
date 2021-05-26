@@ -7,28 +7,109 @@
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
 
+Game* gameInstance;
 
-//Game::GetInstance()
-//{
-//	return Instance;
-//}
+LRESULT CALLBACK Game::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)//вызывается каждый раз, когда система получает сообщение (нужно для окошка)
+{
+	switch (umessage)
+	{
+		// Check if the window is being destroyed.
+	case WM_DESTROY:
+	case WM_CLOSE:
+	{
+		PostQuitMessage(0);
+		//isExitRequested = true;
+		return 0;
+	}
+
+	case WM_SIZE:
+	{
+		std::cout << "Width " << LOWORD(lparam) << " Height " << HIWORD(lparam) << std::endl;
+
+		return 0;
+	}
+
+	// Check if a key has been pressed on the keyboard.
+	case WM_KEYDOWN:
+	{
+		// If a key is pressed send it to the input object so it can record that state.
+		std::cout << "Key: " << static_cast<unsigned int>(wparam) << std::endl;
+
+		if (static_cast<unsigned int>(wparam) == 27) PostQuitMessage(0);
+		return 0;
+	}
+
+	// Check if a key has been released on the keyboard.
+	case WM_KEYUP:
+	{
+		// If a key is released then send it to the input object so it can unset the state for that key.
+		return 0;
+	}
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	case WM_INPUT:
+	{
+		UINT dwSize = 0;
+		GetRawInputData(reinterpret_cast<HRAWINPUT>(lparam), RID_INPUT, nullptr, &dwSize, sizeof(RAWINPUTHEADER));
+		LPBYTE lpb = new BYTE[dwSize];
+		if (lpb == nullptr) {
+			return 0;
+		}
+
+		if (GetRawInputData((HRAWINPUT)lparam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)) != dwSize)
+			OutputDebugString(TEXT("GetRawInputData does not return correct size !\n"));
+
+		RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(lpb);
+
+		if (raw->header.dwType == RIM_TYPEKEYBOARD)
+		{
+			//printf(" Kbd: make=%04i Flags:%04i Reserved:%04i ExtraInformation:%08i, msg=%04i VK=%i \n",
+			//	raw->data.keyboard.MakeCode,
+			//	raw->data.keyboard.Flags,
+			//	raw->data.keyboard.Reserved,
+			//	raw->data.keyboard.ExtraInformation,
+			//	raw->data.keyboard.Message,
+			//	raw->data.keyboard.VKey);
+
+			gameInstance->inputDevice->OnKeyDown({
+				raw->data.keyboard.MakeCode,
+				raw->data.keyboard.Flags,
+				raw->data.keyboard.VKey,
+				raw->data.keyboard.Message
+				});
+		}
+		else if (raw->header.dwType == RIM_TYPEMOUSE)
+		{
+			//printf(" Mouse: X=%04d Y:%04d \n", raw->data.mouse.lLastX, raw->data.mouse.lLastY);
+			gameInstance->inputDevice->OnMouseMove({
+				raw->data.mouse.usFlags,
+				raw->data.mouse.usButtonFlags,
+				static_cast<int>(raw->data.mouse.ulExtraInformation),
+				static_cast<int>(raw->data.mouse.ulRawButtons),
+				static_cast<short>(raw->data.mouse.usButtonData),
+				raw->data.mouse.lLastX,
+				raw->data.mouse.lLastY
+				});
+		}
+
+		delete[] lpb;
+		return DefWindowProc(hwnd, umessage, wparam, lparam);
+	}
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// All other messages pass to the message handler in the system class.
+	default:
+	{
+		return DefWindowProc(hwnd, umessage, wparam, lparam);
+	}
+	}
+}
 
 Game::Game(DisplayWindow* display, std::string name)
 {
+	gameInstance = this;
 	Game::appDisplay = display;
 	Game::name = name;
-	//Instance = this;
 }
-
-//void Game::SetInstance(Game* gameObj)
-//{
-//	gameObj->Instance = gameObj;
-//}
-//
-//Game* Game::GetInstance()
-//{
-//	return Game::this->Instance;
-//}
 
 HRESULT Game::Run() //определение ресурсов и запуск цикла
 {

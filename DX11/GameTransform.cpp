@@ -1,47 +1,55 @@
 #include "GameTransform.h"
 #include "SimpleMath.h"
+#include "GridComponent.h"
+#include "Keys.h"
 
 using namespace DirectX::SimpleMath;
+
+GridComponent* grid;
+TriangleComponent* triangleObject;
 
 void GameTransform::Initialize()
 {
 	gameCamera = new Camera();
-	gameCamCtrl = new CameraController();
+	gameCameraCtrl = new CameraController();
 
-	//plane = new PlaneComponent();
-	//triangleObj = new TriangleComponent();
+	grid = new GridComponent(device, context, {}, gameCamera); /////////////////////////////////////
+	triangleObject = new TriangleComponent(device, context, { Vector4(0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+		Vector4(-0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
+		Vector4(0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
+		Vector4(-0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), }, gameCamera);
 
-	//trianglObjects.emplace_back(plane);
-	//trianglObjects.emplace_back(triangleObj);
+	trianglObjects.emplace_back(grid);
+	trianglObjects.emplace_back(triangleObject);
 }
 
 void GameTransform::Update(float deltaTime)
 {
-	//gameCamCtrl->Update(deltaTime);
+	gameCameraCtrl->Update(deltaTime);
 
-	//float velocity = 500.0f;
+	float velocity = 500.0f;
 
-	//if (InDevice->IsKeyDown(Keys::A))
-	//{
-	//	triangleObj->position += velocity * DirectX::SimpleMath::Vector3::Left * deltaTime;
-	//}
-	//if (InDevice->IsKeyDown(Keys::D))
-	//{
-	//	triangleObj->position += velocity * DirectX::SimpleMath::Vector3::Right * deltaTime;
-	//}
-	//if (InDevice->IsKeyDown(Keys::W))
-	//{
-	//	triangleObj->position += velocity * DirectX::SimpleMath::Vector3::Up * deltaTime;
-	//}
-	//if (InDevice->IsKeyDown(Keys::S))
-	//{
-	//	triangleObj->position += velocity * DirectX::SimpleMath::Vector3::Down * deltaTime;
-	//}
+	/*if (inputDevice->IsKeyDown(Keys::A))
+	{
+		triangleObject->objectPosition += velocity * Vector3::Left * deltaTime;
+	}
+	if (inputDevice->IsKeyDown(Keys::D))
+	{
+		triangleObject->objectPosition += velocity * Vector3::Right * deltaTime;
+	}
+	if (inputDevice->IsKeyDown(Keys::W))
+	{
+		triangleObject->objectPosition += velocity * Vector3::Up * deltaTime;
+	}
+	if (inputDevice->IsKeyDown(Keys::S))
+	{
+		triangleObject->objectPosition += velocity * Vector3::Down * deltaTime;
+	}
 
-	//if (InDevice->IsKeyDown(Keys::Escape))
-	//{
-	//	Exit();
-	//}
+	if (inputDevice->IsKeyDown(Keys::Escape))
+	{
+		Exit();
+	}*/
 
-	//Game::Update();//вызывкется апдейт для всех компонентов
+	Game::Update(deltaTime);//вызывкется апдейт для всех компонентов
 }

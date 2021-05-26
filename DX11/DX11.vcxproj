@@ -142,9 +142,11 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraController.cpp" />
+    <ClCompile Include="Delegates.cpp" />
     <ClCompile Include="DisplayWindow.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameTransform.cpp" />
+    <ClCompile Include="GridComponent.cpp" />
     <ClCompile Include="InputDevice.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TriangleComponent.cpp" />
@@ -152,16 +154,22 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraController.h" />
+    <ClInclude Include="Delegates.h" />
     <ClInclude Include="DisplayWindow.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameComponent.h" />
     <ClInclude Include="GameTransform.h" />
+    <ClInclude Include="GridComponent.h" />
     <ClInclude Include="InputDevice.h" />
+    <ClInclude Include="Keys.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="TriangleComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="Delegates.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,6 +5,8 @@
 #include "TriangleComponent.h"
 #include <vector>
 
+#include "InputDevice.h"
+
 class Game
 {
 //private:
@@ -31,6 +33,7 @@ public:
 	float totalTime = 0;
 	unsigned int frameCount = 0;
 
+	InputDevice* inputDevice = nullptr;
 
 public:
 	Game(DisplayWindow* display, std::string name);
@@ -45,6 +48,8 @@ public:
 	virtual void DestroyRecources();
 	
 	virtual void Update(float deltaTime);// пробегает по всем компонентам и вызывает у них метод апдейт
+	
+	static LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
 
 
 };
