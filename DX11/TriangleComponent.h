@@ -23,7 +23,7 @@ public:
 	ID3DBlob* pixelBC = nullptr; //место в памяти под пиксельный шейдер
 	ID3D11Buffer* vertexBuffer = nullptr; //vertices
 	ID3D11Buffer* indexBuffer = nullptr;
-	ID3D11RasterizerState* rastState = nullptr;
+	ID3D11RasterizerState* rastState = nullptr; //настройка отрисовки для конкретного объекта
 	//ID3DUserDefinedAnnotation* annotation = nullptr;
 
 	ID3D11Buffer* constantBuffer = nullptr;//константный буфер

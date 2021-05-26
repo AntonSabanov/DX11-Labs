@@ -5,13 +5,20 @@
 
 using namespace DirectX::SimpleMath;
 
-GridComponent* grid;
-TriangleComponent* triangleObject;
+GridComponent* grid;//сетка
+TriangleComponent* triangleObject;//объект из треугольников
 
-void GameTransform::Initialize()
+//GameTransform::GameTransform(DisplayWindow* display)
+//{
+//	//gameInstance = this;
+//	Game::appDisplay = display;
+//	Game::name = name;
+//}
+
+void GameTransform::Initialize()//создание камеры и объектов
 {
-	gameCamera = new Camera();
-	gameCameraCtrl = new CameraController();
+	gameCamera = new Camera(this);
+	gameCameraCtrl = new CameraController(this, gameCamera);
 
 	grid = new GridComponent(device, context, {}, gameCamera); /////////////////////////////////////
 	triangleObject = new TriangleComponent(device, context, { Vector4(0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
@@ -23,19 +30,22 @@ void GameTransform::Initialize()
 	trianglObjects.emplace_back(triangleObject);
 }
 
-void GameTransform::Update(float deltaTime)
+void GameTransform::Update(float deltaTime)//1
 {
 	gameCameraCtrl->Update(deltaTime);
 
 	float velocity = 500.0f;
 
-	/*if (inputDevice->IsKeyDown(Keys::A))
+	//перемещение объекта
+	if (inputDevice->IsKeyDown(Keys::A))
 	{
 		triangleObject->objectPosition += velocity * Vector3::Left * deltaTime;
+		std::cout << "Move left" << std::endl;
 	}
 	if (inputDevice->IsKeyDown(Keys::D))
 	{
 		triangleObject->objectPosition += velocity * Vector3::Right * deltaTime;
+		std::cout << "Move right" << std::endl;
 	}
 	if (inputDevice->IsKeyDown(Keys::W))
 	{
@@ -48,8 +58,14 @@ void GameTransform::Update(float deltaTime)
 
 	if (inputDevice->IsKeyDown(Keys::Escape))
 	{
-		Exit();
-	}*/
+		//Exit();
+		std::cout << "Exit" << std::endl;//
+	}
 
 	Game::Update(deltaTime);//вызывкется апдейт для всех компонентов
+}
+
+void GameTransform::OnMouseMove(InputDevice::MouseMoveEventArgs& args)
+{
+	std::cout << args.Position.x << " " << args.Position.y << std::endl; //отслеживание курсора
 }

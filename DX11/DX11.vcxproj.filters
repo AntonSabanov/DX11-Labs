@@ -83,13 +83,24 @@
     <ClInclude Include="Delegates.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="..\packages\directxtk_desktop_2017.2021.4.7.2\include\SimpleMath.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\packages\directxtk_desktop_2017.2021.4.7.2\include\SimpleMath.inl">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="Delegates.natvis">
       <Filter>Файлы ресурсов</Filter>
     </Natvis>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="MiniTri.hlsl">
+      <Filter>Файлы ресурсов</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

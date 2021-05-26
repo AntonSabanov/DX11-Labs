@@ -12,11 +12,11 @@ TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* 
 	{
 		triangleObjPoints.emplace_back(points[i]);
 	}
-	//TriangleComponent::context = context;
+	TriangleComponent::context = context;
 	gameCamera = camera;
 	objectPosition = Vector3::Zero;//установка позиции объекта
 
-	Initialize(device, context);
+	Initialize(device, context);//сразу инициализируем объект
 }
 
 HRESULT TriangleComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext* context)
@@ -77,6 +77,7 @@ HRESULT TriangleComponent::CreateShaders(ID3D11Device* device)
 		else
 		{
 			//MessageBox(game->appDisplay->hWnd, L"MiniTri.fx", L"Missing Shader File", MB_OK);
+			std::cout << "Missing Shader File" << std::endl;//
 		}
 
 		return 0;
@@ -105,6 +106,7 @@ HRESULT TriangleComponent::CreateShaders(ID3D11Device* device)
 		else
 		{
 			//MessageBox(game->appDisplay->hWnd, L"MiniTri.fx", L"Missing Shader File", MB_OK);
+			std::cout << "Missing Shader File" << std::endl;//
 		}
 
 		return 0;
@@ -219,6 +221,19 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 	return 0;
 }
 
+void TriangleComponent::Update(float deltaTime)//4
+{
+	auto wvp = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//исходя из позиции создается транслешн матрица и умножается на матрицы камеры (камера обновляется перед этим)
+
+	D3D11_MAPPED_SUBRESOURCE res = {};
+	context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);					//запись в константный буфер
+
+	auto dataPtr = reinterpret_cast<float*>(res.pData);
+	memcpy(dataPtr, &wvp, sizeof(Matrix));												//копируем данные из матрицы
+
+	context->Unmap(constantBuffer, 0);													//подтверждение изменений в буфере
+}
+
 void TriangleComponent::Draw(ID3D11DeviceContext* context)
 {
 	UINT strides = 32;
@@ -242,7 +257,7 @@ void TriangleComponent::Draw(ID3D11DeviceContext* context)
 	//annotation->BeginEvent(L"BeginDraw");
 	 
 	//context->DrawIndexed(3, 0, 0);
-	context->DrawIndexed(6, 0, 0);
+	context->DrawIndexed(6, 0, 0);//рисуем индексированные точки
 	//context->DrawAuto();
 
 	//annotation->EndEvent();
@@ -255,15 +270,3 @@ void TriangleComponent::DestroyResources()
 	if (pixelShader) pixelShader->Release();
 }
 
-void TriangleComponent::Update(float deltaTime)
-{
-	auto wvp = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//
-
-	D3D11_MAPPED_SUBRESOURCE res = {};
-	context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
-
-	auto dataPtr = reinterpret_cast<float*>(res.pData);
-	memcpy(dataPtr, &wvp, sizeof(Matrix));
-
-	context->Unmap(constantBuffer, 0);
-}

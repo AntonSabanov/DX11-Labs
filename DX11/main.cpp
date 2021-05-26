@@ -24,7 +24,8 @@
 #include <thread>
 
 #include "DisplayWindow.h"
-#include "Game.h"
+//#include "Game.h"
+#include "GameTransform.h"
 #include "InputDevice.h"
 
 #define ZCHECK(exp)                                                        \
@@ -52,10 +53,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 
 	DisplayWindow* display = new DisplayWindow(800, 800);
 
-	Game* game = new Game(display, "DX11 Framework");
+	//Game* game = new Game(display, "DX11 Framework");
+	//InputDevice* inputDevice = new InputDevice(game);
+	//game->inputDevice = inputDevice;
+	//game->Run();
+
+	GameTransform* game = new GameTransform(display, "DX11 Framework");
 	InputDevice* inputDevice = new InputDevice(game);
 	game->inputDevice = inputDevice;
-	//display->inDevice = inputDevice;
 	game->Run();
 
 }
