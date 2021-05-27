@@ -1,4 +1,6 @@
 #include "CameraController.h"
+#include "Camera.h"//
+#include "Game.h"//
 
 using namespace DirectX::SimpleMath;
 
@@ -9,8 +11,7 @@ CameraController::CameraController(Game* gameInst, Camera* camera)
 	yaw = 0;
 	pitch = 0;
 	//CameraController& controller = *this;
-	CameraController& cont = *this;
-	cameraPosition = DirectX::SimpleMath::Vector3(1, 1, 1);
+	cameraPosition = DirectX::SimpleMath::Vector3(0.5, 0.5, 0.5);
 	game->inputDevice->MouseMove.AddRaw(this, &CameraController::OnMouseMove); //подписываемся на движение мыши
 }
 
@@ -18,6 +19,7 @@ void CameraController::Update(float deltaTime)//2
 {
 	auto rotationMatrix = Matrix::CreateFromYawPitchRoll(yaw, pitch, 0); //создаем матрицу вращения (определяет, куда мы смотрим
 
+	//движение камеры
 	auto moveDirection = Vector3::Zero;
 	if (game->inputDevice->IsKeyDown(Keys::W)) moveDirection += Vector3(1.0f, 0.0f, 0.0f);//движемся вперед
 	if (game->inputDevice->IsKeyDown(Keys::S)) moveDirection += Vector3(-1.0f, 0.0f, 0.0f);//движемся назад

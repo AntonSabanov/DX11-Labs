@@ -185,8 +185,8 @@ void Game::Draw()
 	//-----------------------------------------------------------------------------
 	//CLEAR BACKBUFER
 	//-----------------------------------------------------------------------------
-	float color[] = { totalTime, 0.1f, 0.1f, 1.0f };
-	//float color[] = { 0.1f, 0.1f, 0.1f, 1.0f };//цвет, которым мы очищаем рендер таргет вью
+	//float color[] = { totalTime, 0.1f, 0.1f, 1.0f };
+	float color[] = { 0.1f, 0.1f, 0.1f, 1.0f };//цвет, которым мы очищаем рендер таргет вью
 	
 	context->OMSetRenderTargets(1, &rtv, nullptr);//так как у нас флип модель, надо это делать на каждом кадре//Подключаем объект заднего буфера к контексту устройства (очистка заднего буфера)
 	context->ClearRenderTargetView(rtv, color);//очистили цветом
@@ -202,10 +202,10 @@ void Game::Draw()
 
 	Update(deltaTime);
 
-	for (auto&& i : trianglObjects)
-	{
-		i->Draw(context);
-	}
+	//for (auto&& i : trianglObjects)
+	//{
+	//	i->Draw(context);
+	//}
 	annotation->EndEvent();
 	
 #pragma endregion Draw
@@ -218,7 +218,12 @@ void Game::Draw()
 
 void Game::Update(float deltaTime)//3
 {
-	for (auto comp : trianglObjects) comp->Update(deltaTime);
+	for (auto comp : trianglObjects)
+	{
+		comp->Update(deltaTime);
+		comp->Draw(context);
+		//swapChain1->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
+	}
 }
 
 void Game::DestroyRecources()

@@ -8,6 +8,7 @@
 
 using namespace DirectX::SimpleMath;
 
+//class Camera;
 
 class TriangleComponent : public GameComponent
 {

@@ -17,10 +17,10 @@ DirectX::SimpleMath::Matrix Camera::GetCameraMatrix() const
 
 DirectX::SimpleMath::Vector3 Camera::GetPosition() const
 {
-	DirectX::SimpleMath::Matrix inv;
+	/*DirectX::SimpleMath::Matrix inv;
 	viewMatrix.Invert(inv);
-	return inv.Translation();
-	//return -viewMatrix.Translation();
+	return inv.Translation();*/
+	return -viewMatrix.Translation();
 }
 
 DirectX::SimpleMath::Vector3 Camera::GetForwardVector() const

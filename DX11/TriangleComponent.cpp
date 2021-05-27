@@ -207,14 +207,24 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 	ZCHECK(res);
 
 	//создаем константный буфер
-	D3D11_BUFFER_DESC constBufDesc = {};
-	indexBufDesc.ByteWidth = sizeof(Matrix);
-	indexBufDesc.Usage = D3D11_USAGE_DYNAMIC;
-	indexBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	indexBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	indexBufDesc.MiscFlags = 0;
-	indexBufDesc.StructureByteStride = 0;
+	//D3D11_BUFFER_DESC constBufDesc = {};
+	//indexBufDesc.ByteWidth = sizeof(Matrix);
+	//indexBufDesc.Usage = D3D11_USAGE_DYNAMIC;
+	//indexBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	//indexBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	//indexBufDesc.MiscFlags = 0;
+	//indexBufDesc.StructureByteStride = 0;
 
+	//res = device->CreateBuffer(&constBufDesc, nullptr, &constantBuffer);
+
+	D3D11_BUFFER_DESC constBufDesc = {};	
+	constBufDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	constBufDesc.MiscFlags = 0;
+	constBufDesc.StructureByteStride = 0;
+	constBufDesc.ByteWidth = sizeof(Matrix);
+	
 	res = device->CreateBuffer(&constBufDesc, nullptr, &constantBuffer);
 	ZCHECK(res);
 
@@ -227,6 +237,8 @@ void TriangleComponent::Update(float deltaTime)//4
 
 	D3D11_MAPPED_SUBRESOURCE res = {};
 	context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);					//запись в константный буфер
+
+	float test = (float)(1);
 
 	auto dataPtr = reinterpret_cast<float*>(res.pData);
 	memcpy(dataPtr, &wvp, sizeof(Matrix));												//копируем данные из матрицы
