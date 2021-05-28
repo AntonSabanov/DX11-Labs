@@ -31,18 +31,22 @@ HRESULT Game::Run() //определение ресурсов и запуск цикла
 
 	// Loop until there is a quit message from the window or the user.
 	bool isExitRequested = false;
-	while (!isExitRequested) {
+	while (!isExitRequested) 
+	{
 		// Handle the windows messages.
-		/*while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);*/
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) 
+		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+		//if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+		//	TranslateMessage(&msg);
+		//	DispatchMessage(&msg);
+		//}
 
 		// If windows signals to end the application then exit out.
-		if (msg.message == WM_QUIT) {
+		if (msg.message == WM_QUIT) 
+		{
 			isExitRequested = true;
 		}
 
@@ -213,7 +217,8 @@ void Game::Draw()
 	//PRESENT RESULT
 	//-----------------------------------------------------------------------------
 //EndFrame
-	swapChain1->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
+	//swapChain1->Present(1, DXGI_PRESENT_DO_NOT_WAIT); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
+	swapChain1->Present(1, 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
 }
 
 void Game::Update(float deltaTime)//3

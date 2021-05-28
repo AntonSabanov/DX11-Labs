@@ -1,17 +1,37 @@
-struct ConstantData
+struct ConstantData 
 {
-	float4x4 WorldViewProj; //матрица
+	float4x4 WorldViewProj;
 };
 
-cbuffer ConstBuff : register(b0) 
+struct MeshConstData 
+{
+	float4x4 Transform;
+	float4 Color;
+};
+
+cbuffer ConstBuf:register(b0) 
 {
 	ConstantData ConstData;
 }
 
-struct VS_IN
+cbuffer ConstMeshBuf:register(b1)
+{
+	MeshConstData MeshData;
+}
+
+struct VS_IN {
+	float4 pos : POSITION;
+	float4 col :  COLOR;
+};
+
+struct VS_MESH_IN 
 {
 	float4 pos : POSITION0;
-	float4 col : COLOR0;
+	float4 normal : NORMAL0;
+	float4 binormal : BINORMAL0;
+	float4 tangent : TANGENT0;
+	float4 color : COLOR0;
+	float4 text : TEXCOORD0;
 };
 
 struct PS_IN
@@ -30,12 +50,18 @@ PS_IN VSMain(VS_IN input)
 	return output;
 }
 
+PS_IN VSMainMesh(VS_MESH_IN input) {
+	PS_IN output = (PS_IN)0;
+	output.pos = mul(float4(input.pos.xyz, 1.0f), MeshData.Transform);
+	output.col = MeshData.Color;
+
+	return output;
+
+}
+
 float4 PSMain(PS_IN input) : SV_Target
 {
 	float4 col = input.col;
-#ifdef TEST
-	if (input.pos.x > 400) col = TCOLOR;
-#endif
 
 	return col;
 }

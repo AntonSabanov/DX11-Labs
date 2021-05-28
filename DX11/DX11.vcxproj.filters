@@ -98,9 +98,4 @@
       <Filter>Файлы ресурсов</Filter>
     </Natvis>
   </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="MiniTri.hlsl">
-      <Filter>Файлы ресурсов</Filter>
-    </FxCompile>
-  </ItemGroup>
 </Project>

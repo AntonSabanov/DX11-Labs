@@ -11,7 +11,8 @@ CameraController::CameraController(Game* gameInst, Camera* camera)
 	yaw = 0;
 	pitch = 0;
 	//CameraController& controller = *this;
-	cameraPosition = DirectX::SimpleMath::Vector3(0.5, 0.5, 0.5);
+	cameraPosition = DirectX::SimpleMath::Vector3(0, 1, 1);//стартовая позиция камеры
+	//cameraPosition = DirectX::SimpleMath::Vector3(1, 1, 1);
 	game->inputDevice->MouseMove.AddRaw(this, &CameraController::OnMouseMove); //подписываемся на движение мыши
 }
 
@@ -37,9 +38,10 @@ void CameraController::Update(float deltaTime)//2
 		moveDirectionWorld.Normalize();
 	}
 
-	cameraPosition = cameraPosition + moveDirection * velocityMagnitude * deltaTime; //deltaTime - нужно чтобы отвязаться от частоты кадров
-	gameCamera->viewMatrix = Matrix::CreateLookAt(cameraPosition, cameraPosition * rotationMatrix.Forward(), rotationMatrix.Up());
+	cameraPosition = cameraPosition + moveDirectionWorld * velocityMagnitude * deltaTime; //deltaTime - нужно чтобы отвязаться от частоты кадров
+	gameCamera->viewMatrix = Matrix::CreateLookAt(cameraPosition, cameraPosition + rotationMatrix.Forward(), rotationMatrix.Up());
 	gameCamera->projectionMatrix = gameCamera->UpdateProjectionMatrix();
+	//gameCamera->UpdateProjectionMatrix();
 }
 
 void CameraController::OnMouseMove(const InputDevice::MouseMoveEventArgs& args)
@@ -51,6 +53,8 @@ void CameraController::OnMouseMove(const InputDevice::MouseMoveEventArgs& args)
 
 	if (args.WheelDelta == 0) return;
 
-	if (args.WheelDelta > 0) velocityMagnitude += 1;//увеличение скорости
-	if (args.WheelDelta < 0) velocityMagnitude -= 1;//уменьшение скорости
+	if (args.WheelDelta > 0) 
+		velocityMagnitude += 1;//увеличение скорости
+	if (args.WheelDelta < 0) 
+		velocityMagnitude -= 1;//уменьшение скорости
 }

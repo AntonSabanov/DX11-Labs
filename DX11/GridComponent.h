@@ -1,4 +1,5 @@
 #pragma once
+#include "pch.h"
 #include "GameComponent.h"
 #include "Camera.h"//
 
@@ -8,29 +9,29 @@ using namespace DirectX::SimpleMath;
 
 class GridComponent : public GameComponent
 {
-//public:
-//	std::vector<Vector4> triangleObjPoints; //список координат точек объекта
-//
-//	ID3D11InputLayout* layout;
-//	ID3D11VertexShader* vertexShader;
-//	ID3D11PixelShader* pixelShader;
-//	ID3DBlob* vertexBC; //скомпилированный вершинный шейдер помещается сюда
-//	ID3DBlob* pixelBC; //место в памяти под пиксельный шейдер
-//	ID3D11Buffer* vertexBuffer; //vertices
-//	ID3D11Buffer* indexBuffer;
-//	ID3D11RasterizerState* rastState;
-//	//ID3DUserDefinedAnnotation* annotation = nullptr;
-//
-//	ID3D11Buffer* constantBuffer;//константный буфер
-//	Camera* gameCamera = nullptr;//от сюда будем получать матрицы вида и проекции
-//
-//	//position//позиция самого объекта
-//
 public:
-	GridComponent(ID3D11Device* device,
-		ID3D11DeviceContext* context,
-		std::vector<Vector4> points,
-		Camera* camera);
+	ID3D11DeviceContext* context;
+
+	std::vector<Vector4> objectPoints; //список координат точек объекта
+	std::vector<int> pointIndeces;
+
+	ID3D11InputLayout* layout = nullptr;
+	ID3D11VertexShader* vertexShader = nullptr;
+	ID3D11PixelShader* pixelShader = nullptr;
+	ID3DBlob* vertexBC = nullptr; //скомпилированный вершинный шейдер помещается сюда
+	ID3DBlob* pixelBC = nullptr; //место в памяти под пиксельный шейдер
+	ID3D11Buffer* vertexBuffer = nullptr; //vertices
+	ID3D11Buffer* indexBuffer = nullptr;
+	ID3D11RasterizerState* rastState = nullptr; //настройка отрисовки для конкретного объекта
+	//ID3DUserDefinedAnnotation* annotation = nullptr;
+
+	ID3D11Buffer* constantBuffer = nullptr;//константный буфер
+	Camera* gameCamera = nullptr;//от сюда будем получать матрицы вида и проекции
+
+	Vector3 objectPosition;//позиция самого объекта
+
+public:
+	GridComponent(ID3D11Device* device, ID3D11DeviceContext* context, std::vector<Vector4> points, std::vector<int> indeces, Camera* camera);
 
 	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;//?
 	void Draw(ID3D11DeviceContext* context) override; // берем гейм, у гейма достаем контекст и у контекста вызываем сет пиксель шейдер, сет - вертекс шейдерб сет растерайзед стейт, сет вертекс буфер
@@ -38,9 +39,9 @@ public:
 	void Update(float deltaTime) override;//апдетить значения в буферах
 	void DestroyResources() override;
 //
-//private:
-//	HRESULT CreateShaders(ID3D11Device* device);
-//	HRESULT CreateLayout(ID3D11Device* device);
-//	HRESULT CreateBufers(ID3D11Device* device);
+private:
+	HRESULT CreateShaders(ID3D11Device* device);
+	HRESULT CreateLayout(ID3D11Device* device);
+	HRESULT CreateBufers(ID3D11Device* device);
 };
 

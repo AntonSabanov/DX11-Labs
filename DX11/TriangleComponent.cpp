@@ -15,7 +15,7 @@ TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* 
 	TriangleComponent::context = context;
 	gameCamera = camera;
 	objectPosition = Vector3::Zero;//установка позиции объекта
-
+  	//objectPosition += Vector3(0, 0, 10);
 	Initialize(device, context);//сразу инициализируем объект
 }
 
@@ -31,17 +31,17 @@ HRESULT TriangleComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext*
 	//SETUP RASTERIZER STAGE AND VIEWPORT
 	//-----------------------------------------------------------------------------
 	CD3D11_RASTERIZER_DESC rastDesc = {};
-	rastDesc.CullMode = D3D11_CULL_NONE;// по какому признаку одбрасываем ненужные треугольники (NONE - не будем отбрасывать, BACK - отбрасывать задние,FRONT)
+	rastDesc.CullMode = D3D11_CULL_BACK;// по какому признаку одбрасываем ненужные треугольники (NONE - не будем отбрасывать, BACK - отбрасывать задние,FRONT)
 	rastDesc.FillMode = D3D11_FILL_SOLID; //принцып рисования объектов (SOLID - запоненный, WIREFRAME - только сетка)
 	//дополнительные параметры 2:10:00
-	/*rastDesc.FrontCounterClockwise = false; //обход по часовой или против часовой ститается фронтом
-	rastDesc.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;//при расчете глубины пикселя
-	rastDesc.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;//максимальное значение depth биаса
-	rastDesc.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-	rastDesc.DepthClipEnable = true;//отсичение того, что дальше области видимости
-	rastDesc.ScissorEnable = false;
-	rastDesc.MultisampleEnable = false;//будет ли работать сглаживание
-	rastDesc.AntialiasedLineEnable = false;*/ //сглаживание для линий
+	rastDesc.FrontCounterClockwise = true; //обход по часовой или против часовой ститается фронтом
+	//rastDesc.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;//при расчете глубины пикселя
+	//rastDesc.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;//максимальное значение depth биаса
+	//rastDesc.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+	//rastDesc.DepthClipEnable = true;//отсичение того, что дальше области видимости
+	//rastDesc.ScissorEnable = false;
+	//rastDesc.MultisampleEnable = false;//будет ли работать сглаживание
+	//rastDesc.AntialiasedLineEnable = false; //сглаживание для линий
 
 	res = device->CreateRasterizerState(&rastDesc, &rastState);
 	ZCHECK(res);
@@ -171,32 +171,71 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 	//-----------------------------------------------------------------------------
 	//CREATE VERTEX AND INDEX (OPTIONAL) BUFFERS
 	//-----------------------------------------------------------------------------
-	int indeces[] = { 0,1,2, 1,0,3 };//массив индексов
+	// 
+	int n = 16;//10
+	points = new Vector4[n]{
+	   Vector4(0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+	   Vector4(-0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
+	   Vector4(0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
+	   Vector4(-0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f),
+	   Vector4(0.5f, 0.5f, -0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+	   Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
+	   Vector4(-0.5f, 0.5f, -0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
+	   Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), };
+	//int indeces[] = { 0,1,2, 1,0,3 };//массив индексов для квадратика
+	
+	//int indeces[] {
+	//	0, 2, 1,
+	//		0, 3, 4,
+	//		0, 1, 3,
+	//		0, 4, 2,
+	//		1, 2, 3,
+	//		2, 4, 3,
+	//};
 	//int indeces[] = {0, 1, 2};//массив индексов
 
-	D3D11_BUFFER_DESC vertexBufDesc = {};
-	vertexBufDesc.ByteWidth = sizeof(Vector4) * std::size(triangleObjPoints);//размер буфера в байтах
+	int indeces[] = { //массив индексов для кубика
+		0,1,2,
+		1,0,3,
+		4,2,5,
+		2,4,0,
+		6,5,7,
+		5,6,4,
+		3,7,1,
+		7,3,6,
+		4,3,0,
+		3,4,6,
+		2,7,5,
+		7,2,1 };
+
+	//вертексный буфер
+	D3D11_BUFFER_DESC vertexBufDesc = {};	
 	vertexBufDesc.Usage = D3D11_USAGE_DEFAULT; // то, как часто будет обновляться вершинный буфер
 	vertexBufDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER; //куда буфер может быть привязан
 	vertexBufDesc.CPUAccessFlags = 0; //0 -если не хотим чтения и записи с цпу
 	vertexBufDesc.MiscFlags = 0;
 	vertexBufDesc.StructureByteStride = 0;
+	vertexBufDesc.ByteWidth = sizeof(Vector4) * std::size(triangleObjPoints);//размер буфера в байтах
+	//vertexBufDesc.ByteWidth = sizeof(Vector4) * 16;//размер буфера в байтах
 
 	D3D11_SUBRESOURCE_DATA vertexData = {};
 	vertexData.pSysMem = triangleObjPoints.data();
+	//vertexData.pSysMem = points;
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 
 	res = device->CreateBuffer(&vertexBufDesc, &vertexData, &vertexBuffer);
 	ZCHECK(res);
 
-	D3D11_BUFFER_DESC indexBufDesc = {};
-	indexBufDesc.ByteWidth = sizeof(int) * std::size(indeces);
+	//индексный буфер
+	D3D11_BUFFER_DESC indexBufDesc = {};	
 	indexBufDesc.Usage = D3D11_USAGE_DEFAULT;
 	indexBufDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufDesc.CPUAccessFlags = 0;
 	indexBufDesc.MiscFlags = 0;
 	indexBufDesc.StructureByteStride = 0;	
+	indexBufDesc.ByteWidth = sizeof(int) * std::size(indeces);
+	//indexBufDesc.ByteWidth = sizeof(int) * 36;
 
 	D3D11_SUBRESOURCE_DATA indexData = {};
 	indexData.pSysMem = indeces;
@@ -234,11 +273,10 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 void TriangleComponent::Update(float deltaTime)//4
 {
 	auto wvp = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//исходя из позиции создается транслешн матрица и умножается на матрицы камеры (камера обновляется перед этим)
+	wvp = wvp.Transpose();
 
 	D3D11_MAPPED_SUBRESOURCE res = {};
 	context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);					//запись в константный буфер
-
-	float test = (float)(1);
 
 	auto dataPtr = reinterpret_cast<float*>(res.pData);
 	memcpy(dataPtr, &wvp, sizeof(Matrix));												//копируем данные из матрицы
@@ -269,8 +307,10 @@ void TriangleComponent::Draw(ID3D11DeviceContext* context)
 	//annotation->BeginEvent(L"BeginDraw");
 	 
 	//context->DrawIndexed(3, 0, 0);
-	context->DrawIndexed(6, 0, 0);//рисуем индексированные точки
-	//context->DrawAuto();
+
+	//context->DrawIndexed(6, 0, 0);//рисуем индексированные точки для квадратика
+	context->DrawIndexed(36, 0, 0);//рисуем индексированные точки для кубика
+
 
 	//annotation->EndEvent();
 }

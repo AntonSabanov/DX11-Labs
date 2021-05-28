@@ -24,5 +24,6 @@ public:
 	DirectX::SimpleMath::Vector3 GetForwardVector() const;
 
 	DirectX::SimpleMath::Matrix UpdateProjectionMatrix();
+	//void UpdateProjectionMatrix();
 };
 

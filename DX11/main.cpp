@@ -51,7 +51,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	//CREATE A FORM
 	//----------------------------------------------------------------	
 
-	DisplayWindow* display = new DisplayWindow(800, 800);
+	DisplayWindow* display = new DisplayWindow(1024, 1024);
 
 	//Game* game = new Game(display, "DX11 Framework");
 	//InputDevice* inputDevice = new InputDevice(game);

@@ -32,6 +32,8 @@ public:
 
 	Vector3 objectPosition;//позиция самого объекта
 
+	DirectX::SimpleMath::Vector4* points = nullptr;
+
 public:
 	TriangleComponent(ID3D11Device* device,
 						ID3D11DeviceContext* context, 
