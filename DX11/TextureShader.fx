@@ -51,8 +51,10 @@ float4 PSMain(PS_IN input, in bool isFrontFace : SV_IsFrontFace) : SV_Target
 
 	//if (!isFrontFace)
 	//{
-		col = DiffuseMap.Sample(Sampler, float2(input.tex.x, 1.0f - input.tex.y));
+	//	col = DiffuseMap.Sample(Sampler, float2(input.tex.x, 1.0f - input.tex.y));
 	//}
 
+	col = DiffuseMap.Sample(Sampler, float2(input.tex.x, 1.0f - input.tex.y));
+	
 	return col;
 }

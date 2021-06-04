@@ -126,50 +126,50 @@ void GameTransform::Initialize()//создание камеры и объектов
 
 
 	//кубик с текстурой
-	//texObj = new TextureObjComponent(this, device, context, {
-	//	Vector4(0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позици€ (от -1 до 1) //цвет
-	//	Vector4(-0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-	//	Vector4(0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-	//	Vector4(-0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f),
-	//	Vector4(0.5f, 0.5f, -0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позици€ (от -1 до 1) //цвет
-	//	Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-	//	Vector4(-0.5f, 0.5f, -0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-	//	Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f),}, 
-	//	{ 0,1,2, 1,0,3, 4,2,5, 2,4,0, 6,5,7, 5,6,4, 3,7,1, 7,3,6, 4,3,0, 3,4,6, 2,7,5, 7,2,1 },//массив индексов дл€ кубика
-	//	L"Obj.obj", L"Wall.png", gameCamera);
-
 	texObj = new TextureObjComponent(this, device, context, {
-		(Vector4)Vector3(-1.0f, 1.0f, -1.0f),    (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
-		(Vector4)Vector3(1.0f, 1.0f, -1.0f),		(Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
-		(Vector4)Vector3(1.0f, 1.0f, 1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
-		(Vector4)Vector3(-1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
-
-		(Vector4)Vector3(-1.0f, -1.0f, -1.0f),   (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
-		(Vector4)Vector3(1.0f, -1.0f, -1.0f),    (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
-		(Vector4)Vector3(1.0f, -1.0f, 1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
-		(Vector4)Vector3(-1.0f, -1.0f, 1.0f),    (Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
-
-		(Vector4)Vector3(-1.0f, -1.0f, 1.0f),    (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
-		(Vector4)Vector3(-1.0f, -1.0f, -1.0f),   (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
-		(Vector4)Vector3(-1.0f, 1.0f, -1.0f),    (Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
-		(Vector4)Vector3(-1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
-
-		(Vector4)Vector3(1.0f, -1.0f, 1.0f),		(Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
-		(Vector4)Vector3(1.0f, -1.0f, -1.0f),    (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
-		(Vector4)Vector3(1.0f, 1.0f, -1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
-		(Vector4)Vector3(1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
-
-		(Vector4)Vector3(-1.0f, -1.0f, -1.0f),   (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
-		(Vector4)Vector3(1.0f, -1.0f, -1.0f),    (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
-		(Vector4)Vector3(1.0f, 1.0f, -1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
-		(Vector4)Vector3(-1.0f, 1.0f, -1.0f),    (Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
-
-		(Vector4)Vector3(-1.0f, -1.0f, 1.0f),    (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f),
-		(Vector4)Vector3(1.0f, -1.0f, 1.0f),		(Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f),
-		(Vector4)Vector3(1.0f, 1.0f, 1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f),
-		(Vector4)Vector3(-1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f), },
-		{3,1,0, 2,1,3, 6,4,5, 7,4,6, 11,9,8, 10,9,11, 14,12,13, 15,12,14, 19,17,16, 18,17,19, 22,20,21, 23,20,22},//массив индексов дл€ кубика
+		Vector4(0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 0.0f),		//0
+		Vector4(-0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 1.0f, 0.0f, 0.0f),		//1
+		Vector4(0.5f, -0.5f, 0.5f, 1.0f),	Vector4(1.0f, 1.0f, 0.0f, 0.0f),		//2
+		Vector4(-0.5f, 0.5f, 0.5f, 1.0f),	Vector4(0.0f, 0.0f, 0.0f, 0.0f),		//3
+		Vector4(0.5f, 0.5f, -0.5f, 1.0f),	Vector4(0.0f, 0.0f, 0.0f, 0.0f),		//4
+		Vector4(0.5f, -0.5f, -0.5f, 1.0f),	Vector4(0.0f, 1.0f, 0.0f, 0.0f),		//5
+		Vector4(-0.5f, 0.5f, -0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 0.0f),		//6
+		Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 0.0f, 0.0f), },		//7
+		{ 0,1,2, 1,0,3, 4,2,5, 2,4,0, 6,5,7, 5,6,4, 3,7,1, 7,3,6, 4,3,0, 3,4,6, 2,7,5, 7,2,1 },//массив индексов дл€ кубика
 		L"Obj.obj", L"Wall.png", gameCamera);
+
+	//texObj = new TextureObjComponent(this, device, context, {
+	//	(Vector4)Vector3(-1.0f, 1.0f, -1.0f),    (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
+	//	(Vector4)Vector3(1.0f, 1.0f, -1.0f),		(Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
+	//	(Vector4)Vector3(1.0f, 1.0f, 1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
+	//	(Vector4)Vector3(-1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
+	//
+	//	(Vector4)Vector3(-1.0f, -1.0f, -1.0f),   (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
+	//	(Vector4)Vector3(1.0f, -1.0f, -1.0f),    (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
+	//	(Vector4)Vector3(1.0f, -1.0f, 1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
+	//	(Vector4)Vector3(-1.0f, -1.0f, 1.0f),    (Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
+	//
+	//	(Vector4)Vector3(-1.0f, -1.0f, 1.0f),    (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
+	//	(Vector4)Vector3(-1.0f, -1.0f, -1.0f),   (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
+	//	(Vector4)Vector3(-1.0f, 1.0f, -1.0f),    (Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
+	//	(Vector4)Vector3(-1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
+	//
+	//	(Vector4)Vector3(1.0f, -1.0f, 1.0f),		(Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
+	//	(Vector4)Vector3(1.0f, -1.0f, -1.0f),    (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
+	//	(Vector4)Vector3(1.0f, 1.0f, -1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
+	//	(Vector4)Vector3(1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
+	//
+	//	(Vector4)Vector3(-1.0f, -1.0f, -1.0f),   (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
+	//	(Vector4)Vector3(1.0f, -1.0f, -1.0f),    (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
+	//	(Vector4)Vector3(1.0f, 1.0f, -1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
+	//	(Vector4)Vector3(-1.0f, 1.0f, -1.0f),    (Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
+	//
+	//	(Vector4)Vector3(-1.0f, -1.0f, 1.0f),    (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f),
+	//	(Vector4)Vector3(1.0f, -1.0f, 1.0f),		(Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f),
+	//	(Vector4)Vector3(1.0f, 1.0f, 1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f),
+	//	(Vector4)Vector3(-1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f), },
+	//	{3,1,0, 2,1,3, 6,4,5, 7,4,6, 11,9,8, 10,9,11, 14,12,13, 15,12,14, 19,17,16, 18,17,19, 22,20,21, 23,20,22},//массив индексов дл€ кубика
+	//	L"Obj.obj", L"Wall.png", gameCamera);
 
 	components.emplace_back(grid);
 	components.emplace_back(basis);
