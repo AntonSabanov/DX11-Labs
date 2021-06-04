@@ -5,17 +5,22 @@
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
 
-TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* context, std::vector<Vector4> points, Camera* camera)
+TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* context, std::vector<Vector4> points, std::vector<int> indeces, Camera* camera)
 {
 	//game = gameObj;
 	for (size_t i = 0; i < points.size(); ++i) 
 	{
 		triangleObjPoints.emplace_back(points[i]);
 	}
+	for (size_t i = 0; i < indeces.size(); ++i)//заполнение массива индексов
+	{
+		pointIndeces.emplace_back(indeces[i]);
+	}
+
 	TriangleComponent::context = context;
 	gameCamera = camera;
 	objectPosition = Vector3::Zero;//установка позиции объекта
-  	//objectPosition += Vector3(0, 0, 10);
+  	//objectPosition += Vector3(0, 0.5, 0);
 	Initialize(device, context);//сразу инициализируем объект
 }
 
@@ -35,6 +40,7 @@ HRESULT TriangleComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext*
 	rastDesc.FillMode = D3D11_FILL_SOLID; //принцып рисования объектов (SOLID - запоненный, WIREFRAME - только сетка)
 	//дополнительные параметры 2:10:00
 	rastDesc.FrontCounterClockwise = true; //обход по часовой или против часовой ститается фронтом
+	
 	//rastDesc.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;//при расчете глубины пикселя
 	//rastDesc.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;//максимальное значение depth биаса
 	//rastDesc.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
@@ -55,12 +61,13 @@ HRESULT TriangleComponent::CreateShaders(ID3D11Device* device)
 	HRESULT res;
 
 	ID3DBlob* errorVertexCode;
+
 	res = D3DCompileFromFile(L"MiniTri.fx",
 		nullptr /*macros*/,
 		nullptr /*include*/,
 		"VSMain", //компиляция вершинного шейдера (точка входа в fx файле)
 		"vs_5_0", //тип шейдера_версия (vs - vertex shaider)
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, //комбинация флагов для компиляции шейдеров (| - or / или)
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, //комбинация флагов для компиляции шейдеров (| - or / или) D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
 		0, //флаги для компиляции эффектов
 		&vertexBC, //скомпилированный вершинный шейдер помещается сюда (байт код шедера)
 		&errorVertexCode); //сообщение об ошибке, если код не удалось скомпилировать
@@ -68,7 +75,8 @@ HRESULT TriangleComponent::CreateShaders(ID3D11Device* device)
 	//проверка errorVertexCode на наличие ошибки
 	if (FAILED(res)) {
 		// If the shader failed to compile it should have written something to the error message.
-		if (errorVertexCode) {
+		if (errorVertexCode) 
+		{
 			char* compileErrors = (char*)(errorVertexCode->GetBufferPointer());
 
 			std::cout << compileErrors << std::endl;
@@ -79,7 +87,6 @@ HRESULT TriangleComponent::CreateShaders(ID3D11Device* device)
 			//MessageBox(game->appDisplay->hWnd, L"MiniTri.fx", L"Missing Shader File", MB_OK);
 			std::cout << "Missing Shader File" << std::endl;//
 		}
-
 		return 0;
 	}
 
@@ -90,7 +97,7 @@ HRESULT TriangleComponent::CreateShaders(ID3D11Device* device)
 		nullptr /*include*/,
 		"PSMain",
 		"ps_5_0",
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, //D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
 		0,
 		&pixelBC,
 		&errorPixelCode);
@@ -108,7 +115,6 @@ HRESULT TriangleComponent::CreateShaders(ID3D11Device* device)
 			//MessageBox(game->appDisplay->hWnd, L"MiniTri.fx", L"Missing Shader File", MB_OK);
 			std::cout << "Missing Shader File" << std::endl;//
 		}
-
 		return 0;
 	}
 
@@ -135,13 +141,13 @@ HRESULT TriangleComponent::CreateLayout(ID3D11Device* device)
 	//формат данных вершин (шаблон вершин) - какие именно параметры содержат вершины, которые мы собираемся использовать, какие данные и в каком порядке хранятся в вершинном буфере (шейдере?)
 	D3D11_INPUT_ELEMENT_DESC inputElements[] = {
 		D3D11_INPUT_ELEMENT_DESC {
-			"POSITION", //семантическое имя поля в шейдере
-			0, //семантический индекс поля (если есть несколько полей с одинаковым семантическим именем)
-			DXGI_FORMAT_R32G32B32A32_FLOAT, //размер (для float4)
-			0, //входящий слот (0-15) индекс подключенного вершинного буфера
-			0, //адрес начала данных в буфере вершин (сдвиг в байтах для этого элемента внутри вершинного буфера в пределах одной вершины) используется, если в одно вершинном буфере хранится несколько элементов
-			D3D11_INPUT_PER_VERTEX_DATA, //класс входящего слота (не важно)
-			0}, //InstanceDataStepRate (не важно)
+			"POSITION",								//семантическое имя поля в шейдере
+			0,										//семантический индекс поля (если есть несколько полей с одинаковым семантическим именем)
+			DXGI_FORMAT_R32G32B32A32_FLOAT,			//размер (для float4)
+			0,										//входящий слот (0-15) индекс подключенного вершинного буфера
+			0,										//адрес начала данных в буфере вершин (сдвиг в байтах для этого элемента внутри вершинного буфера в пределах одной вершины) используется, если в одно вершинном буфере хранится несколько элементов
+			D3D11_INPUT_PER_VERTEX_DATA,			//класс входящего слота (не важно)
+			0},										//InstanceDataStepRate (не важно)
 		D3D11_INPUT_ELEMENT_DESC {
 			"COLOR",
 			0,
@@ -154,8 +160,8 @@ HRESULT TriangleComponent::CreateLayout(ID3D11Device* device)
 
 	//создание шаблона вершин
 	res = device->CreateInputLayout(
-		inputElements, //массив дескрипторов
-		2, //2 элемента в массиве дескрипторов
+		inputElements,					//массив дескрипторов
+		2,								//2 элемента в массиве дескрипторов
 		vertexBC->GetBufferPointer(),
 		vertexBC->GetBufferSize(),
 		&layout);
@@ -194,19 +200,19 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 	//};
 	//int indeces[] = {0, 1, 2};//массив индексов
 
-	int indeces[] = { //массив индексов для кубика
-		0,1,2,
-		1,0,3,
-		4,2,5,
-		2,4,0,
-		6,5,7,
-		5,6,4,
-		3,7,1,
-		7,3,6,
-		4,3,0,
-		3,4,6,
-		2,7,5,
-		7,2,1 };
+	//int indeces[] = { //массив индексов для кубика
+	//	0,1,2,
+	//	1,0,3,
+	//	4,2,5,
+	//	2,4,0,
+	//	6,5,7,
+	//	5,6,4,
+	//	3,7,1,
+	//	7,3,6,
+	//	4,3,0,
+	//	3,4,6,
+	//	2,7,5,
+	//	7,2,1 };
 
 	//вертексный буфер
 	D3D11_BUFFER_DESC vertexBufDesc = {};	
@@ -234,11 +240,11 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 	indexBufDesc.CPUAccessFlags = 0;
 	indexBufDesc.MiscFlags = 0;
 	indexBufDesc.StructureByteStride = 0;	
-	indexBufDesc.ByteWidth = sizeof(int) * std::size(indeces);
+	indexBufDesc.ByteWidth = sizeof(int) * std::size(pointIndeces);
 	//indexBufDesc.ByteWidth = sizeof(int) * 36;
 
 	D3D11_SUBRESOURCE_DATA indexData = {};
-	indexData.pSysMem = indeces;
+	indexData.pSysMem = pointIndeces.data();
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 

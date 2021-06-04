@@ -63,19 +63,31 @@ HRESULT Game::Run() //определение ресурсов и запуск цикла
 void Game::Initialize()
 {
 	//Camera* gameCamera = new Camera(this);//
-	trianglObjects.emplace_back(new TriangleComponent(device, context, 
+	components.emplace_back(new TriangleComponent(device, context, 
 		{ Vector4(0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
 		Vector4(-0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 0.0f, 1.0f, 1.0f),
 		Vector4(0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 1.0f, 0.0f, 1.0f),
 		Vector4(-0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f),
-		}, 
+		}, { //массив индексов для кубика
+		0,1,2,
+		1,0,3,
+		4,2,5,
+		2,4,0,
+		6,5,7,
+		5,6,4,
+		3,7,1,
+		7,3,6,
+		4,3,0,
+		3,4,6,
+		2,7,5,
+		7,2,1 },
 		nullptr));//камера
 
-	//trianglObjects.emplace_back(new TriangleComponent(device, context, { Vector4(0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+	//components.emplace_back(new TriangleComponent(device, context, { Vector4(0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
 	//															Vector4(-0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 0.0f, 1.0f, 1.0f),
 	//															Vector4(0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 1.0f, 0.0f, 1.0f),
 	//	}));
-	//trianglObjects.emplace_back(new TriangleComponent(device, context, { Vector4(-0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 0.0f, 1.0f, 1.0f),
+	//components.emplace_back(new TriangleComponent(device, context, { Vector4(-0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 0.0f, 1.0f, 1.0f),
 	//																Vector4(0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет		
 	//																Vector4(-0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f),
 	//	}));
@@ -145,7 +157,8 @@ HRESULT Game::PrepareRecources()
 	viewport.MaxDepth = 1.0f;
 
 	context->RSSetViewports(1, &viewport);
-	context->OMSetRenderTargets(1, &rtv, nullptr);
+	//context->OMSetRenderTargets(1, &rtv, nullptr);
+	context->OMSetRenderTargets(1, &rtv, depthView);
 
 	/*ID3D11Debug* debug;
 	device->QueryInterface(IID_ID3D11Debug, (void**)&debug);*/
@@ -153,7 +166,7 @@ HRESULT Game::PrepareRecources()
 	return 0;
 }
 
-HRESULT Game::CreateBackBufer()
+HRESULT Game::CreateBackBufer() //создание заднего буфера и буфера глубины
 {
 	HRESULT res;
 
@@ -161,6 +174,30 @@ HRESULT Game::CreateBackBufer()
 	ZCHECK(res);
 	res = device->CreateRenderTargetView(backBuffer, nullptr, &rtv);			// устанавливаем задний буфер как рендер таргет
 	ZCHECK(res);
+
+	D3D11_TEXTURE2D_DESC depthTexDesc = {};
+	depthTexDesc.ArraySize = 1;//одна текстура в бэк буфере
+	depthTexDesc.MipLevels = 1;//нулевой уровень
+	depthTexDesc.Format = DXGI_FORMAT_R32_TYPELESS;//
+	depthTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_DEPTH_STENCIL;
+	depthTexDesc.CPUAccessFlags = 0;
+	depthTexDesc.MiscFlags = 0;
+	depthTexDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthTexDesc.Width = appDisplay->screenWidth;
+	depthTexDesc.Height = appDisplay->screenHeight;
+	depthTexDesc.SampleDesc = { 1, 0 };
+
+	res = device->CreateTexture2D(&depthTexDesc, nullptr, &depthBuffer);
+	ZCHECK(res);
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilDesc = {};
+	depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	depthStencilDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilDesc.Flags = 0;
+
+	res = device->CreateDepthStencilView(depthBuffer, &depthStencilDesc, &depthView);
+	ZCHECK(res);
+
 	return 0;
 }
 
@@ -192,21 +229,23 @@ void Game::Draw()
 	//float color[] = { totalTime, 0.1f, 0.1f, 1.0f };
 	float color[] = { 0.1f, 0.1f, 0.1f, 1.0f };//цвет, которым мы очищаем рендер таргет вью
 	
-	context->OMSetRenderTargets(1, &rtv, nullptr);//так как у нас флип модель, надо это делать на каждом кадре//Подключаем объект заднего буфера к контексту устройства (очистка заднего буфера)
+	context->OMSetRenderTargets(1, &rtv, depthView);
+	//context->OMSetRenderTargets(1, &rtv, nullptr);//так как у нас флип модель, надо это делать на каждом кадре//Подключаем объект заднего буфера к контексту устройства (очистка заднего буфера)
 	context->ClearRenderTargetView(rtv, color);//очистили цветом
+	context->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 #pragma endregion PrepareFrame
 
 #pragma region Draw
 
 	context->RSSetViewports(1, &viewport);
-	//context->OMSetRenderTargets(1, &rtv, nullptr);
+	//context->OMSetRenderTargets(1, &rtv, depthView);
 
 	annotation->BeginEvent(L"BeginDraw");
 	//context_->DrawIndexed(6, 0, 0);
 
 	Update(deltaTime);
 
-	//for (auto&& i : trianglObjects)
+	//for (auto&& i : components)
 	//{
 	//	i->Draw(context);
 	//}
@@ -223,7 +262,7 @@ void Game::Draw()
 
 void Game::Update(float deltaTime)//3
 {
-	for (auto comp : trianglObjects)
+	for (auto comp : components)
 	{
 		comp->Update(deltaTime);
 		comp->Draw(context);
@@ -238,7 +277,7 @@ void Game::DestroyRecources()
 	//if (constantBuffer) constantBuffer->Release();
 	//if (vertexBuffer) vertexBuffer->Release();
 	//if (indexBuffer) indexBuffer->Release();
-	for (auto c : trianglObjects)
+	for (auto c : components)
 	{
 		c->DestroyResources();
 	}

@@ -3,22 +3,21 @@
 #include "DisplayWindow.h"
 #include "GameComponent.h"
 #include "TriangleComponent.h"
+#include "TextureLoader.h"
 #include <vector>
 
 #include "InputDevice.h"
 
 class Game
 {
-//private:
-//	Game* Instance;
 public:
-	std::vector<GameComponent*> trianglObjects;
-	//TriangleComponent sas[8];
+	std::vector<GameComponent*> components;
 	//Game* Instance;
 	std::string name;
 	DisplayWindow* appDisplay = nullptr;//окно приложения
 	D3D11_VIEWPORT viewport = {};
-	ID3D11Texture2D* backBuffer = nullptr; //задний буфер в виде текстуры										//?
+	ID3D11Texture2D* backBuffer = nullptr; //задний буфер в виде текстуры	
+	ID3D11Texture2D* depthBuffer = nullptr;
 	ID3D11DeviceContext* context = nullptr;//рисование
 	ID3DUserDefinedAnnotation* annotation = nullptr; // debug annotation
 	ID3D11Device* device;//девайс Microsoft::WRL::ComPtr<ID3D11Device>
@@ -35,11 +34,13 @@ public:
 
 	InputDevice* inputDevice = nullptr;
 
+	ID3D11DepthStencilView* depthView = nullptr;
+
+	TextureLoader* texLoader;
+
 public:
 	Game(DisplayWindow* display, std::string name);
 	
-	//static void SetInstance(Game* gameObj);
-	//static Game* GetInstance();
 	HRESULT Run();
 	virtual void Initialize(); //создаем энное количество триангл компонентов и добовляем их в components //будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены//затем пробигаем по всем компонентам и вызываем у них инишалайз
 	virtual HRESULT PrepareRecources();

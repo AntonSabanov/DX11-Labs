@@ -1,13 +1,16 @@
 #include "GameTransform.h"
 #include "SimpleMath.h"
 #include "GridComponent.h"
+#include "TextureObjComponent.h"
 #include "Keys.h"
 
+//using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-GridComponent* grid;//сетка
-GridComponent* basis;
-TriangleComponent* triangleObject;//объект из треугольников
+GridComponent* grid;				//сетка
+GridComponent* basis;				//нулевой пивот
+TriangleComponent* triangleObject;	//объект из треугольников
+TextureObjComponent* texObj;
 
 //GameTransform::GameTransform(DisplayWindow* display)
 //{
@@ -20,6 +23,8 @@ void GameTransform::Initialize()//создание камеры и объектов
 {
 	gameCamera = new Camera(this);
 	gameCameraCtrl = new CameraController(this, gameCamera);
+
+	texLoader = new TextureLoader(this);
 
 	basis = new GridComponent(device, context, {
 		Vector4(0.0f,  0.0f,  0.0f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //ось х
@@ -82,7 +87,7 @@ void GameTransform::Initialize()//создание камеры и объектов
 	//	Vector4(-0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
 	//	Vector4(0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
 	//	Vector4(-0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f),}, gameCamera);
-
+	//
 	//triangleObject = new TriangleComponent(device, context, {
 	//	Vector4(50.0f, 0.0f, 50.0f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
 	//	Vector4(-50.0f, -0.0f, 50.0f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
@@ -99,7 +104,8 @@ void GameTransform::Initialize()//создание камеры и объектов
 		Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
 		Vector4(-0.5f, 0.5f, -0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
 		Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 
-		}, gameCamera);
+		}, { //массив индексов для кубика
+		0,1,2, 1,0,3, 4,2,5, 2,4,0, 6,5,7, 5,6,4, 3,7,1, 7,3,6, 4,3,0, 3,4,6, 2,7,5, 7,2,1 }, gameCamera);
 
 	//triangleObject = new TriangleComponent(device, context, {
 	//	Vector4(0.5f, 0.0f, 0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
@@ -110,7 +116,7 @@ void GameTransform::Initialize()//создание камеры и объектов
 	//	Vector4(0.5f, -0.0f, -0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
 	//	Vector4(-0.5f, 0.0f, -0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
 	//	Vector4(-0.5f, -0.0f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), }, gameCamera);
-	
+	//
 	//triangleObject = new TriangleComponent(device, context, {
 	//	Vector4(0.0f, 1.0f, 0.0f, 1.0f), Vector4(1.0f, 1.0f, 0.0f, 1.0f),
 	//	Vector4(-1.0f, 0.0f, -1.0f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
@@ -119,9 +125,56 @@ void GameTransform::Initialize()//создание камеры и объектов
 	//	Vector4(1.0f, 0.0f, 1.0f, 1.0f), Vector4(1.0f, 0.0f, 1.0f, 1.0f) }, gameCamera);
 
 
-	trianglObjects.emplace_back(grid);
-	trianglObjects.emplace_back(basis);
-	trianglObjects.emplace_back(triangleObject);
+	//кубик с текстурой
+	//texObj = new TextureObjComponent(this, device, context, {
+	//	Vector4(0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+	//	Vector4(-0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
+	//	Vector4(0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
+	//	Vector4(-0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f),
+	//	Vector4(0.5f, 0.5f, -0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+	//	Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
+	//	Vector4(-0.5f, 0.5f, -0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
+	//	Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f),}, 
+	//	{ 0,1,2, 1,0,3, 4,2,5, 2,4,0, 6,5,7, 5,6,4, 3,7,1, 7,3,6, 4,3,0, 3,4,6, 2,7,5, 7,2,1 },//массив индексов для кубика
+	//	L"Obj.obj", L"Wall.png", gameCamera);
+
+	texObj = new TextureObjComponent(this, device, context, {
+		(Vector4)Vector3(-1.0f, 1.0f, -1.0f),    (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
+		(Vector4)Vector3(1.0f, 1.0f, -1.0f),		(Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
+		(Vector4)Vector3(1.0f, 1.0f, 1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
+		(Vector4)Vector3(-1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, 1.0f, 0.0f),
+
+		(Vector4)Vector3(-1.0f, -1.0f, -1.0f),   (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
+		(Vector4)Vector3(1.0f, -1.0f, -1.0f),    (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
+		(Vector4)Vector3(1.0f, -1.0f, 1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
+		(Vector4)Vector3(-1.0f, -1.0f, 1.0f),    (Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, -1.0f, 0.0f),
+
+		(Vector4)Vector3(-1.0f, -1.0f, 1.0f),    (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
+		(Vector4)Vector3(-1.0f, -1.0f, -1.0f),   (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
+		(Vector4)Vector3(-1.0f, 1.0f, -1.0f),    (Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
+		(Vector4)Vector3(-1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(-1.0f, 0.0f, 0.0f),
+
+		(Vector4)Vector3(1.0f, -1.0f, 1.0f),		(Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
+		(Vector4)Vector3(1.0f, -1.0f, -1.0f),    (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
+		(Vector4)Vector3(1.0f, 1.0f, -1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
+		(Vector4)Vector3(1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(1.0f, 0.0f, 0.0f),
+
+		(Vector4)Vector3(-1.0f, -1.0f, -1.0f),   (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
+		(Vector4)Vector3(1.0f, -1.0f, -1.0f),    (Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
+		(Vector4)Vector3(1.0f, 1.0f, -1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
+		(Vector4)Vector3(-1.0f, 1.0f, -1.0f),    (Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, -1.0f),
+
+		(Vector4)Vector3(-1.0f, -1.0f, 1.0f),    (Vector4)Vector2(0.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f),
+		(Vector4)Vector3(1.0f, -1.0f, 1.0f),		(Vector4)Vector2(1.0f, 0.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f),
+		(Vector4)Vector3(1.0f, 1.0f, 1.0f),		(Vector4)Vector2(1.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f),
+		(Vector4)Vector3(-1.0f, 1.0f, 1.0f),		(Vector4)Vector2(0.0f, 1.0f), (Vector4)Vector3(0.0f, 0.0f, 1.0f), },
+		{3,1,0, 2,1,3, 6,4,5, 7,4,6, 11,9,8, 10,9,11, 14,12,13, 15,12,14, 19,17,16, 18,17,19, 22,20,21, 23,20,22},//массив индексов для кубика
+		L"Obj.obj", L"Wall.png", gameCamera);
+
+	components.emplace_back(grid);
+	components.emplace_back(basis);
+	components.emplace_back(triangleObject);
+	components.emplace_back(texObj);
 }
 
 void GameTransform::Update(float deltaTime)//1
@@ -130,37 +183,43 @@ void GameTransform::Update(float deltaTime)//1
 
 	float velocity = 5.0f;
 
-	//перемещение объекта
-	//if (inputDevice->IsKeyDown(Keys::Left))//37
-	//{
-	//	//triangleObject->objectPosition += velocity * Vector3::Left * deltaTime;
-	//	basis->objectPosition += velocity * Vector3::Left * deltaTime;
-	//	std::cout << "Move odject left" << std::endl;
-	//}
-	//if (inputDevice->IsKeyDown(Keys::Right))//39
-	//{
-	//	//triangleObject->objectPosition += velocity * Vector3::Right * deltaTime;
-	//	basis->objectPosition += velocity * Vector3::Right * deltaTime;
-	//	std::cout << "Move odject right" << std::endl;
-	//}
-	//if (inputDevice->IsKeyDown(Keys::Up))//38
-	//{
-	//	//triangleObject->objectPosition += velocity * Vector3::Up * deltaTime;
-	//	basis->objectPosition += velocity * Vector3::Down * deltaTime;
-	//	std::cout << "Move odject up" << std::endl;
-	//}
-	//if (inputDevice->IsKeyDown(Keys::Down))//40
-	//{
-	//	//triangleObject->objectPosition += velocity * Vector3::Down * deltaTime;
-	//	basis->objectPosition += velocity * Vector3::Up * deltaTime;
-	//	std::cout << "Move odject down" << std::endl;
-	//}
+	auto mat = Matrix::CreateRotationX(DirectX::XMConvertToRadians(10));
 
-	//if (inputDevice->IsKeyDown(Keys::Escape))
-	//{
-	//	//Exit();
-	//	std::cout << "Exit sas" << std::endl;//
-	//}
+	//Matrix::
+
+	//перемещение объекта
+	if (inputDevice->IsKeyDown(Keys::Left))//37
+	{
+		triangleObject->objectPosition += velocity * Vector3::Left * deltaTime;
+		//basis->objectPosition += velocity * Vector3::Left * deltaTime;
+		//auto sas = basis->worldMatrix * mat;
+		//basis->objectPosition += (velocity * basis->worldMatrix.Forward() + velocity * basis->worldMatrix.Up() + velocity * basis->worldMatrix.Left())* deltaTime;
+		std::cout << "Move odject left" << std::endl;
+	}
+	if (inputDevice->IsKeyDown(Keys::Right))//39
+	{
+		triangleObject->objectPosition += velocity * Vector3::Right * deltaTime;
+		//basis->objectPosition += velocity * Vector3::Right * deltaTime;
+		std::cout << "Move odject right" << std::endl;
+	}
+	if (inputDevice->IsKeyDown(Keys::Up))//38
+	{
+		triangleObject->objectPosition += velocity * Vector3::Up * deltaTime;
+		//basis->objectPosition += velocity * Vector3::Down * deltaTime;
+		std::cout << "Move odject up" << std::endl;
+	}
+	if (inputDevice->IsKeyDown(Keys::Down))//40
+	{
+		triangleObject->objectPosition += velocity * Vector3::Down * deltaTime;
+		//basis->objectPosition += velocity * Vector3::Up * deltaTime;
+		std::cout << "Move odject down" << std::endl;
+	}
+
+	if (inputDevice->IsKeyDown(Keys::Escape))
+	{
+		//Exit();
+		std::cout << "Exit sas" << std::endl;//
+	}
 
 	Game::Update(deltaTime);//вызывкется апдейт для всех компонентов
 }

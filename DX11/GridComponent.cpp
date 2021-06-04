@@ -14,9 +14,15 @@ GridComponent::GridComponent(ID3D11Device* device, ID3D11DeviceContext* context,
 	{
 		pointIndeces.emplace_back(indeces[i]);
 	}
+
+	//worldMatrix = DirectX::SimpleMath::Matrix::Identity;//
+	
+
 	GridComponent::context = context;
 	gameCamera = camera;
 	objectPosition = Vector3::Zero;//установка позиции объекта
+
+	worldMatrix = Matrix::CreateWorld(objectPosition, Vector3::Forward, Vector3::Up);
 
 	Initialize(device, context);//сразу инициализируем объект
 }

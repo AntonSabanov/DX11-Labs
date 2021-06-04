@@ -16,6 +16,7 @@ public:
 	ID3D11DeviceContext* context;
 
 	std::vector<Vector4> triangleObjPoints; //список координат точек объекта
+	std::vector<int> pointIndeces;
 
 	ID3D11InputLayout* layout = nullptr;
 	ID3D11VertexShader* vertexShader = nullptr;
@@ -34,10 +35,13 @@ public:
 
 	DirectX::SimpleMath::Vector4* points = nullptr;
 
+	
+
 public:
 	TriangleComponent(ID3D11Device* device,
 						ID3D11DeviceContext* context, 
 						std::vector<Vector4> points,
+						std::vector<int> indeces,
 						Camera* camera);
 
 	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;

@@ -19,7 +19,8 @@ cbuffer ConstMeshBuf:register(b1)
 	MeshConstData MeshData;
 }
 
-struct VS_IN {
+struct VS_IN 
+{
 	float4 pos : POSITION;
 	float4 col :  COLOR;
 };
@@ -40,6 +41,9 @@ struct PS_IN
 	float4 col : COLOR;
 };
 
+//Texture2D 	diffuseTex 	: register( t0 ); 
+//SamplerState 	sampler 	: register( s0 ); 
+
 PS_IN VSMain(VS_IN input)
 {
 	PS_IN output = (PS_IN)0;
@@ -50,7 +54,8 @@ PS_IN VSMain(VS_IN input)
 	return output;
 }
 
-PS_IN VSMainMesh(VS_MESH_IN input) {
+PS_IN VSMainMesh(VS_MESH_IN input) 
+{
 	PS_IN output = (PS_IN)0;
 	output.pos = mul(float4(input.pos.xyz, 1.0f), MeshData.Transform);
 	output.col = MeshData.Color;

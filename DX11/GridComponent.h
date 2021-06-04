@@ -30,6 +30,8 @@ public:
 
 	Vector3 objectPosition;//позиция самого объекта
 
+	DirectX::SimpleMath::Matrix worldMatrix;//
+
 public:
 	GridComponent(ID3D11Device* device, ID3D11DeviceContext* context, std::vector<Vector4> points, std::vector<int> indeces, Camera* camera);
 

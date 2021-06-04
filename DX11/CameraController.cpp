@@ -39,8 +39,10 @@ void CameraController::Update(float deltaTime)//2
 	}
 
 	cameraPosition = cameraPosition + moveDirectionWorld * velocityMagnitude * deltaTime; //deltaTime - нужно чтобы отвязаться от частоты кадров
+	//вращение камеры
 	gameCamera->viewMatrix = Matrix::CreateLookAt(cameraPosition, cameraPosition + rotationMatrix.Forward(), rotationMatrix.Up());
 	gameCamera->projectionMatrix = gameCamera->UpdateProjectionMatrix();
+
 	//gameCamera->UpdateProjectionMatrix();
 }
 
