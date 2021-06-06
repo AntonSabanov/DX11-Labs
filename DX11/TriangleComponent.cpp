@@ -177,17 +177,17 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 	//-----------------------------------------------------------------------------
 	//CREATE VERTEX AND INDEX (OPTIONAL) BUFFERS
 	//-----------------------------------------------------------------------------
-	// 
-	int n = 16;//10
-	points = new Vector4[n]{
-	   Vector4(0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
-	   Vector4(-0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-	   Vector4(0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-	   Vector4(-0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f),
-	   Vector4(0.5f, 0.5f, -0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
-	   Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-	   Vector4(-0.5f, 0.5f, -0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-	   Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), };
+	
+	//int n = 16;//10
+	//points = new Vector4[n]{
+	//   Vector4(0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+	//   Vector4(-0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
+	//   Vector4(0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
+	//   Vector4(-0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f),
+	//   Vector4(0.5f, 0.5f, -0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
+	//   Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
+	//   Vector4(-0.5f, 0.5f, -0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
+	//   Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), };
 	//int indeces[] = { 0,1,2, 1,0,3 };//массив индексов для квадратика
 	
 	//int indeces[] {

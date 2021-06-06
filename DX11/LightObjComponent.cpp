@@ -1,15 +1,26 @@
-#include "TextureObjComponent.h"
-
+#include "LightObjComponent.h"
 #include "pch.h"
 #include "SimpleMath.h"
-
 #include "Game.h"
 
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
 
+struct ConstantData
+{
+	Matrix WorldViewProj;
+	Matrix World;
+	Vector4 ViewerPos;
+};
 
-TextureObjComponent::TextureObjComponent(Game* inGame, ID3D11Device* device, ID3D11DeviceContext* context, Vector3 startPosition, std::vector<Vector4> points, std::vector<int> indeces, LPCWSTR inFileName, LPCWSTR inTexName, Camera* camera)
+struct LightData
+{
+	Vector4 Direction;
+	Vector4 Color;
+	Vector4 KaSpecPowKsX;
+};
+
+LightObjComponent::LightObjComponent(Game* inGame, ID3D11Device* device, ID3D11DeviceContext* context, Vector3 startPosition, std::vector<Vector4> points, std::vector<int> indeces, LPCWSTR inFileName, LPCWSTR inTexName, Camera* camera)
 {
 	game = inGame;
 
@@ -21,9 +32,9 @@ TextureObjComponent::TextureObjComponent(Game* inGame, ID3D11Device* device, ID3
 	{
 		pointIndeces.emplace_back(indeces[i]);
 	}
-	TextureObjComponent::context = context;
+	LightObjComponent::context = context;
 	gameCamera = camera;
-	objectPosition = startPosition;//Vector3::Zero + Vector3(0, 1, 0);						//установка позиции объекта
+	objectPosition = startPosition;						//установка позиции объекта
 
 	objFileName = inFileName;
 	textureName = inTexName;
@@ -31,7 +42,7 @@ TextureObjComponent::TextureObjComponent(Game* inGame, ID3D11Device* device, ID3
 	Initialize(device, context);						//сразу инициализируем объект
 }
 
-HRESULT TextureObjComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext* context)
+HRESULT LightObjComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext* context)
 {
 	HRESULT res;
 
@@ -46,11 +57,11 @@ HRESULT TextureObjComponent::Initialize(ID3D11Device* device, ID3D11DeviceContex
 	rastDesc.CullMode = D3D11_CULL_BACK;		// по какому признаку одбрасываем ненужные треугольники (NONE - не будем отбрасывать, BACK - отбрасывать задние,FRONT)
 	rastDesc.FillMode = D3D11_FILL_SOLID;		//принцып рисовани€ объектов (SOLID - запоненный, WIREFRAME - только сетка)
 	rastDesc.FrontCounterClockwise = true;		//обход по часовой или против часовой ститаетс€ фронтом
-	
+
 	res = device->CreateRasterizerState(&rastDesc, &rastState);
 	ZCHECK(res);
 
-	game->texLoader->LoadTextureFromFile(textureName, texture, texSRV, true, false); //грузим нашу текстуру
+	game->texLoader->LoadTextureFromFile(textureName, texture, texSRV, true, false); //грузим текстуру
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -70,18 +81,18 @@ HRESULT TextureObjComponent::Initialize(ID3D11Device* device, ID3D11DeviceContex
 	return 0;
 }
 
-HRESULT TextureObjComponent::CreateShaders(ID3D11Device* device)
+HRESULT LightObjComponent::CreateShaders(ID3D11Device* device)
 {
 	HRESULT res;
 
 	ID3DBlob* errorVertexCode;
 
-	res = D3DCompileFromFile(L"TextureShader.fx",
+	res = D3DCompileFromFile(L"TexLightShader.fx",//L"TextureShader.fx",
 		nullptr,
 		nullptr,
 		"VSMain",												//компил€ци€ вершинного шейдера (точка входа в fx файле)
 		"vs_5_0",												//тип шейдера_верси€ (vs - vertex shaider)
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,		//комбинаци€ флагов дл€ компил€ции шейдеров (| - or / или)
+		D3DCOMPILE_PACK_MATRIX_ROW_MAJOR, //D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,		//комбинаци€ флагов дл€ компил€ции шейдеров (| - or / или)
 		0,														//флаги дл€ компил€ции эффектов
 		&vertexBC,												//скомпилированный вершинный шейдер помещаетс€ сюда (байт код шедера)
 		&errorVertexCode);										//сообщение об ошибке, если код не удалось скомпилировать
@@ -103,12 +114,12 @@ HRESULT TextureObjComponent::CreateShaders(ID3D11Device* device)
 
 	//пиксельный шейдер
 	ID3DBlob* errorPixelCode;
-	res = D3DCompileFromFile(L"TextureShader.fx",
+	res = D3DCompileFromFile(L"TexLightShader.fx",//L"TextureShader.fx",
 		nullptr,
 		nullptr,
 		"PSMain",
 		"ps_5_0",
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, //D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
+		D3DCOMPILE_PACK_MATRIX_ROW_MAJOR, //D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, //D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
 		0,
 		&pixelBC,
 		&errorPixelCode);
@@ -141,42 +152,24 @@ HRESULT TextureObjComponent::CreateShaders(ID3D11Device* device)
 	return 0;
 }
 
-HRESULT TextureObjComponent::CreateLayout(ID3D11Device* device)
+HRESULT LightObjComponent::CreateLayout(ID3D11Device* device)
 {
 	HRESULT res;
 	//-----------------------------------------------------------------------------
 	//CREATE INPUT LAYOUT FOR IA STAGE
 	//-----------------------------------------------------------------------------
 
-	//D3D11_INPUT_ELEMENT_DESC inputElements[] = {
-	//	D3D11_INPUT_ELEMENT_DESC { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	//	D3D11_INPUT_ELEMENT_DESC { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0},
-	//	D3D11_INPUT_ELEMENT_DESC { "TEXTCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0}
-	//};
-
-	//D3D11_INPUT_ELEMENT_DESC inputElements[] =
-	//{
-	//	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//};
-
-	D3D11_INPUT_ELEMENT_DESC inputElements[] =
+	D3D11_INPUT_ELEMENT_DESC inputElements[] = 
 	{
-		D3D11_INPUT_ELEMENT_DESC{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		D3D11_INPUT_ELEMENT_DESC{ "TEXCOORD",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		D3D11_INPUT_ELEMENT_DESC { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		D3D11_INPUT_ELEMENT_DESC { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0},
+		D3D11_INPUT_ELEMENT_DESC { "TEXTCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
-
-	//D3D11_INPUT_ELEMENT_DESC inputElements[] =
-	//{
-	//	D3D11_INPUT_ELEMENT_DESC{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//	D3D11_INPUT_ELEMENT_DESC{ "TEXCOORD",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//};
 
 	//создание шаблона вершин
 	res = device->CreateInputLayout(
-		inputElements,					//массив дескрипторов
-		2,								//2 элемента в массиве дескрипторов
+		inputElements,					
+		3,								
 		vertexBC->GetBufferPointer(),
 		vertexBC->GetBufferSize(),
 		&layout);
@@ -185,14 +178,14 @@ HRESULT TextureObjComponent::CreateLayout(ID3D11Device* device)
 	return 0;
 }
 
-HRESULT TextureObjComponent::CreateBufers(ID3D11Device* device)
+HRESULT LightObjComponent::CreateBufers(ID3D11Device* device)
 {
 	HRESULT res;
 
 	//-----------------------------------------------------------------------------
 	//CREATE VERTEX AND INDEX (OPTIONAL) BUFFERS
 	//-----------------------------------------------------------------------------
-	
+
 	//вертексный буфер
 	D3D11_BUFFER_DESC vertexBufDesc = {};
 	vertexBufDesc.Usage = D3D11_USAGE_DEFAULT;									// то, как часто будет обновл€тьс€ вершинный буфер
@@ -233,18 +226,28 @@ HRESULT TextureObjComponent::CreateBufers(ID3D11Device* device)
 	constBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	constBufDesc.MiscFlags = 0;
 	constBufDesc.StructureByteStride = 0;
-	constBufDesc.ByteWidth = sizeof(Matrix);
+	constBufDesc.ByteWidth = sizeof(ConstantData);
 
 	res = device->CreateBuffer(&constBufDesc, nullptr, &constantBuffer);
 	ZCHECK(res);
 
+	D3D11_BUFFER_DESC lightConstBufDesc = {};
+	lightConstBufDesc.Usage = D3D11_USAGE_DEFAULT;
+	lightConstBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightConstBufDesc.CPUAccessFlags = 0;
+	lightConstBufDesc.MiscFlags = 0;
+	lightConstBufDesc.StructureByteStride = 0;
+	lightConstBufDesc.ByteWidth = sizeof(LightData);
+
+	res = device->CreateBuffer(&lightConstBufDesc, nullptr, &lightBuffer);
+
 	return 0;
 }
 
-void TextureObjComponent::Update(float deltaTime)//4
+void LightObjComponent::Update(float deltaTime)//4
 {
 	auto wvp = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//исход€ из позиции создаетс€ транслешн матрица и умножаетс€ на матрицы камеры (камера обновл€етс€ перед этим)
-	wvp = wvp.Transpose();
+	//wvp = wvp.Transpose();
 
 	D3D11_MAPPED_SUBRESOURCE res = {};
 	context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);					//запись в константный буфер
@@ -255,9 +258,9 @@ void TextureObjComponent::Update(float deltaTime)//4
 	context->Unmap(constantBuffer, 0);													//подтверждение изменений в буфере
 }
 
-void TextureObjComponent::Draw(ID3D11DeviceContext* context)
+void LightObjComponent::Draw(ID3D11DeviceContext* context)
 {
-	UINT strides = 32;
+	UINT strides = 48;//
 	UINT offsets = 0;
 
 	context->IASetInputLayout(layout);											//подключение шаблона вершин к устройству рисовани€
@@ -266,6 +269,7 @@ void TextureObjComponent::Draw(ID3D11DeviceContext* context)
 	context->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);		//выставл€ем вершинный буфер
 
 	context->VSSetConstantBuffers(0, 1, &constantBuffer);						//выставл€ем константный буфер (отвечает за трансформ)
+	context->PSSetConstantBuffers(1, 1, &lightBuffer);
 
 	context->PSSetShaderResources(0, 1, &texSRV);								//подключаем SRV
 	context->PSSetSamplers(0, 1, &samplerState);								//подключаем семплер
@@ -281,11 +285,9 @@ void TextureObjComponent::Draw(ID3D11DeviceContext* context)
 	context->DrawIndexed(36, 0, 0);//рисуем индексированные точки дл€ кубика
 }
 
-void TextureObjComponent::DestroyResources()
+void LightObjComponent::DestroyResources()
 {
 	if (layout) layout->Release();
 	if (vertexShader) vertexShader->Release();
 	if (pixelShader) pixelShader->Release();
 }
-
-

@@ -1,13 +1,13 @@
 #pragma once
 #include "GameComponent.h"
-#include "Camera.h"//
+#include "Camera.h"
 #include "SimpleMath.h"
 
 using namespace DirectX::SimpleMath;
 
 class Game;
 
-class TextureObjComponent : public GameComponent
+class LightObjComponent : public GameComponent
 {
 public:
 	Game* game = nullptr;
@@ -40,16 +40,18 @@ public:
 	ID3D11Texture2D* texture;							//текстура
 	ID3D11ShaderResourceView* texSRV;					//
 
+	ID3D11Buffer* lightBuffer = nullptr;
+
 public:
-	TextureObjComponent(Game* inGame, 
-						ID3D11Device* device,
-						ID3D11DeviceContext* context,
-						Vector3 startPosition,
-						std::vector<Vector4> points,
-						std::vector<int> indeces,
-						LPCWSTR inFileName,
-						LPCWSTR inTexName,
-						Camera* camera);
+	LightObjComponent(Game* inGame,
+		ID3D11Device* device,
+		ID3D11DeviceContext* context,
+		Vector3 startPosition,
+		std::vector<Vector4> points,
+		std::vector<int> indeces,
+		LPCWSTR inFileName,
+		LPCWSTR inTexName,
+		Camera* camera);
 
 	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;
 
@@ -64,6 +66,4 @@ private:
 	HRESULT CreateLayout(ID3D11Device* device);
 	HRESULT CreateBufers(ID3D11Device* device);
 };
-
-
 
