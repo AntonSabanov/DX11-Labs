@@ -18,6 +18,5 @@ public:
 public:
 	//static LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
 	DisplayWindow(int width, int height);
-
 };
 

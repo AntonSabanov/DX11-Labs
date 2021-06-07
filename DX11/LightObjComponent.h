@@ -11,12 +11,9 @@ class LightObjComponent : public GameComponent
 {
 public:
 	Game* game = nullptr;
-
 	ID3D11DeviceContext* context;
-
 	std::vector<Vector4> triangleObjPoints;				//список координат точек объекта
 	std::vector<int> pointIndeces;
-
 	ID3D11InputLayout* layout = nullptr;
 	ID3D11VertexShader* vertexShader = nullptr;
 	ID3D11PixelShader* pixelShader = nullptr;
@@ -25,22 +22,20 @@ public:
 	ID3D11Buffer* vertexBuffer = nullptr;				//vertices
 	ID3D11Buffer* indexBuffer = nullptr;
 	ID3D11RasterizerState* rastState = nullptr;			//настройка отрисовки для конкретного объекта
-	ID3D11SamplerState* samplerState;
-	//ID3DUserDefinedAnnotation* annotation = nullptr;
-
+	ID3D11SamplerState* samplerState = nullptr;
 	ID3D11Buffer* constantBuffer = nullptr;				//константный буфер
 	Camera* gameCamera = nullptr;						//от сюда будем получать матрицы вида и проекции
-
 	Vector3 objectPosition;								//позиция самого объекта
-
 	DirectX::SimpleMath::Vector4* points = nullptr;
-
 	LPCWSTR objFileName;								//имя 3д модели
 	LPCWSTR textureName;								//имя текстуры
 	ID3D11Texture2D* texture;							//текстура
 	ID3D11ShaderResourceView* texSRV;					//
 
-	ID3D11Buffer* lightBuffer = nullptr;
+	//ID3D11Buffer* lightBuffer = nullptr;
+
+	float light_x = 1.0f;
+	float light_z = 1.0f;
 
 public:
 	LightObjComponent(Game* inGame,
@@ -56,8 +51,6 @@ public:
 	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;
 
 	void Draw(ID3D11DeviceContext* context) override;
-
-	//void Reload() override;
 	void Update(float deltaTime) override;
 	void DestroyResources() override;
 

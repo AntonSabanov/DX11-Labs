@@ -15,7 +15,6 @@ TextureLoader::TextureLoader(Game* inGame)
 									NULL, 
 									CLSCTX_INPROC_SERVER, 
 									IID_PPV_ARGS(&factory)); 
-	//ZCHECK(res);
 }
 
 TextureLoader::~TextureLoader()
@@ -26,12 +25,6 @@ TextureLoader::~TextureLoader()
 //на выходе получим текстуру и шейдер ресурс вью
 HRESULT TextureLoader::LoadTextureFromFile(LPCWSTR fileName, ID3D11Texture2D*& texture, ID3D11ShaderResourceView*& textureView, bool generateMips, bool useSrgb, UINT frameIndex)
 {
-	//factory->CreateDecoder(IID_IWICBitmapDecoder, nullptr, &decoder);
-	//IWICStream* pIWICStream = nullptr;
-	//factory->CreateStream(&pIWICStream);
-	//
-	//pIWICStream->InitializeFromFilename(fileName, GENERIC_READ);
-
 	IWICBitmapDecoder* decoder; //декодирование файла
 
 	factory->CreateDecoderFromFilename(fileName, 0, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &decoder);

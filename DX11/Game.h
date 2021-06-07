@@ -12,7 +12,6 @@ class Game
 {
 public:
 	std::vector<GameComponent*> components;
-	//Game* Instance;
 	std::string name;
 	DisplayWindow* appDisplay = nullptr;//окно приложения
 	D3D11_VIEWPORT viewport = {};
@@ -21,21 +20,14 @@ public:
 	ID3D11DeviceContext* context = nullptr;//рисование
 	ID3DUserDefinedAnnotation* annotation = nullptr; // debug annotation
 	ID3D11Device* device;//девайс Microsoft::WRL::ComPtr<ID3D11Device>
-	////Instance
 	std::chrono::time_point<std::chrono::steady_clock> PrevTime;
-	////RenderSRV
 	ID3D11RenderTargetView* rtv = nullptr;//объект заднего буфера, в который будем рисовать //RenderView		//?
-	////ScreenResized
-	////StartTime
 	IDXGISwapChain* swapChain = nullptr;//работа с буферами, вывод на экран
 	IDXGISwapChain1* swapChain1 = nullptr;
 	float totalTime = 0;
 	unsigned int frameCount = 0;
-
 	InputDevice* inputDevice = nullptr;
-
 	ID3D11DepthStencilView* depthView = nullptr;
-
 	TextureLoader* texLoader;
 
 public:
@@ -46,12 +38,9 @@ public:
 	virtual HRESULT PrepareRecources();
 	HRESULT CreateBackBufer();
 	virtual void Draw(); // пробегает по всем компонентам и вызывает у них метод draw
-	virtual void DestroyRecources();
-	
+	virtual void DestroyRecources();	
 	virtual void Update(float deltaTime);// пробегает по всем компонентам и вызывает у них метод апдейт
 	
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
-
-
 };
 

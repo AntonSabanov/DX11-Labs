@@ -31,7 +31,8 @@ public:
 	ID3D11Buffer* constantBuffer = nullptr;				//константный буфер
 	Camera* gameCamera = nullptr;						//от сюда будем получать матрицы вида и проекции
 
-	Vector3 objectPosition;								//позиция самого объекта
+	Vector3 objectPosition;		//позиция самого объекта
+	DirectX::SimpleMath::Matrix Transform;
 
 	DirectX::SimpleMath::Vector4* points = nullptr;
 

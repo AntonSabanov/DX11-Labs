@@ -14,16 +14,9 @@ GridComponent::GridComponent(ID3D11Device* device, ID3D11DeviceContext* context,
 	{
 		pointIndeces.emplace_back(indeces[i]);
 	}
-
-	//worldMatrix = DirectX::SimpleMath::Matrix::Identity;//
-	
-
 	GridComponent::context = context;
 	gameCamera = camera;
 	objectPosition = Vector3::Zero;//установка позиции объекта
-
-	worldMatrix = Matrix::CreateWorld(objectPosition, Vector3::Forward, Vector3::Up);
-
 	Initialize(device, context);//сразу инициализируем объект
 }
 
@@ -167,13 +160,6 @@ HRESULT GridComponent::CreateBufers(ID3D11Device* device)
 	//-----------------------------------------------------------------------------
 	//CREATE VERTEX AND INDEX (OPTIONAL) BUFFERS
 	//-----------------------------------------------------------------------------
-
-	//int indeces[] = { //массив индексов для кубика
-	//	0,1,
-	//	2,3,
-	//	4,5,
-	//	6,7,
-	//	8,9};
 
 	D3D11_BUFFER_DESC vertexBufDesc = {};
 	vertexBufDesc.Usage = D3D11_USAGE_DEFAULT;

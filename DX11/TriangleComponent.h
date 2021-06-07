@@ -1,9 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "GameComponent.h"
-
 #include "Camera.h"//
-
 #include "SimpleMath.h"
 
 using namespace DirectX::SimpleMath;
@@ -34,8 +32,6 @@ public:
 	Vector3 objectPosition;//позиция самого объекта
 
 	DirectX::SimpleMath::Vector4* points = nullptr;
-
-	
 
 public:
 	TriangleComponent(ID3D11Device* device,

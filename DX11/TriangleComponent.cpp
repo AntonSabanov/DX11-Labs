@@ -7,7 +7,6 @@ using namespace DirectX;
 
 TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* context, std::vector<Vector4> points, std::vector<int> indeces, Camera* camera)
 {
-	//game = gameObj;
 	for (size_t i = 0; i < points.size(); ++i) 
 	{
 		triangleObjPoints.emplace_back(points[i]);
@@ -16,11 +15,9 @@ TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* 
 	{
 		pointIndeces.emplace_back(indeces[i]);
 	}
-
 	TriangleComponent::context = context;
 	gameCamera = camera;
 	objectPosition = Vector3::Zero;//установка позиции объекта
-  	//objectPosition += Vector3(0, 0.5, 0);
 	Initialize(device, context);//сразу инициализируем объект
 }
 
@@ -138,6 +135,7 @@ HRESULT TriangleComponent::CreateLayout(ID3D11Device* device)
 	//-----------------------------------------------------------------------------
 	//CREATE INPUT LAYOUT FOR IA STAGE
 	//-----------------------------------------------------------------------------
+	
 	//формат данных вершин (шаблон вершин) - какие именно параметры содержат вершины, которые мы собираемся использовать, какие данные и в каком порядке хранятся в вершинном буфере (шейдере?)
 	D3D11_INPUT_ELEMENT_DESC inputElements[] = {
 		D3D11_INPUT_ELEMENT_DESC {
@@ -177,42 +175,6 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 	//-----------------------------------------------------------------------------
 	//CREATE VERTEX AND INDEX (OPTIONAL) BUFFERS
 	//-----------------------------------------------------------------------------
-	
-	//int n = 16;//10
-	//points = new Vector4[n]{
-	//   Vector4(0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
-	//   Vector4(-0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-	//   Vector4(0.5f, -0.5f, 0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-	//   Vector4(-0.5f, 0.5f, 0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f),
-	//   Vector4(0.5f, 0.5f, -0.5f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
-	//   Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-	//   Vector4(-0.5f, 0.5f, -0.5f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-	//   Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), };
-	//int indeces[] = { 0,1,2, 1,0,3 };//массив индексов для квадратика
-	
-	//int indeces[] {
-	//	0, 2, 1,
-	//		0, 3, 4,
-	//		0, 1, 3,
-	//		0, 4, 2,
-	//		1, 2, 3,
-	//		2, 4, 3,
-	//};
-	//int indeces[] = {0, 1, 2};//массив индексов
-
-	//int indeces[] = { //массив индексов для кубика
-	//	0,1,2,
-	//	1,0,3,
-	//	4,2,5,
-	//	2,4,0,
-	//	6,5,7,
-	//	5,6,4,
-	//	3,7,1,
-	//	7,3,6,
-	//	4,3,0,
-	//	3,4,6,
-	//	2,7,5,
-	//	7,2,1 };
 
 	//вертексный буфер
 	D3D11_BUFFER_DESC vertexBufDesc = {};	
@@ -222,11 +184,9 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 	vertexBufDesc.MiscFlags = 0;
 	vertexBufDesc.StructureByteStride = 0;
 	vertexBufDesc.ByteWidth = sizeof(Vector4) * std::size(triangleObjPoints);//размер буфера в байтах
-	//vertexBufDesc.ByteWidth = sizeof(Vector4) * 16;//размер буфера в байтах
 
 	D3D11_SUBRESOURCE_DATA vertexData = {};
 	vertexData.pSysMem = triangleObjPoints.data();
-	//vertexData.pSysMem = points;
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 
@@ -241,7 +201,6 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 	indexBufDesc.MiscFlags = 0;
 	indexBufDesc.StructureByteStride = 0;	
 	indexBufDesc.ByteWidth = sizeof(int) * std::size(pointIndeces);
-	//indexBufDesc.ByteWidth = sizeof(int) * 36;
 
 	D3D11_SUBRESOURCE_DATA indexData = {};
 	indexData.pSysMem = pointIndeces.data();
@@ -252,16 +211,6 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 	ZCHECK(res);
 
 	//создаем константный буфер
-	//D3D11_BUFFER_DESC constBufDesc = {};
-	//indexBufDesc.ByteWidth = sizeof(Matrix);
-	//indexBufDesc.Usage = D3D11_USAGE_DYNAMIC;
-	//indexBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	//indexBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	//indexBufDesc.MiscFlags = 0;
-	//indexBufDesc.StructureByteStride = 0;
-
-	//res = device->CreateBuffer(&constBufDesc, nullptr, &constantBuffer);
-
 	D3D11_BUFFER_DESC constBufDesc = {};	
 	constBufDesc.Usage = D3D11_USAGE_DYNAMIC;
 	constBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -310,15 +259,7 @@ void TriangleComponent::Draw(ID3D11DeviceContext* context)
 
 	context->RSSetState(rastState);
 
-	//annotation->BeginEvent(L"BeginDraw");
-	 
-	//context->DrawIndexed(3, 0, 0);
-
-	//context->DrawIndexed(6, 0, 0);//рисуем индексированные точки для квадратика
 	context->DrawIndexed(36, 0, 0);//рисуем индексированные точки для кубика
-
-
-	//annotation->EndEvent();
 }
 
 void TriangleComponent::DestroyResources() 

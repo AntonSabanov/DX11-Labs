@@ -2,13 +2,10 @@
 #include "Camera.h"
 #include "Game.h"
 
-#define M_PI 3.14159265358979323846
-
 Camera::Camera(Game* gameInst)
 {
 	game = gameInst;
 	viewMatrix = DirectX::SimpleMath::Matrix::Identity;
-	//UpdateProjectionMatrix();
 	projectionMatrix = UpdateProjectionMatrix();
 }
 
@@ -40,14 +37,3 @@ DirectX::SimpleMath::Matrix Camera::UpdateProjectionMatrix()
 		0.1f, //near plane
 		10000.0f); //far plane
 }
-
-//void Camera::UpdateProjectionMatrix() {
-//	projectionMatrix = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(
-//		(float)M_PI / 2.0f, //(float)1000 / 1000,
-//		(float)game->appDisplay->screenWidth / game->appDisplay->screenHeight,
-//		0.1f,
-//		10000.0
-//	);
-//}
-
-#undef M_PI

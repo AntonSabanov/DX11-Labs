@@ -10,9 +10,7 @@ CameraController::CameraController(Game* gameInst, Camera* camera)
 	gameCamera = camera;
 	yaw = 0;
 	pitch = 0;
-	//CameraController& controller = *this;
 	cameraPosition = DirectX::SimpleMath::Vector3(0, 1, 1);//стартовая позиция камеры
-	//cameraPosition = DirectX::SimpleMath::Vector3(1, 1, 1);
 	game->inputDevice->MouseMove.AddRaw(this, &CameraController::OnMouseMove); //подписываемся на движение мыши
 }
 

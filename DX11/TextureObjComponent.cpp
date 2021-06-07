@@ -148,30 +148,11 @@ HRESULT TextureObjComponent::CreateLayout(ID3D11Device* device)
 	//CREATE INPUT LAYOUT FOR IA STAGE
 	//-----------------------------------------------------------------------------
 
-	//D3D11_INPUT_ELEMENT_DESC inputElements[] = {
-	//	D3D11_INPUT_ELEMENT_DESC { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	//	D3D11_INPUT_ELEMENT_DESC { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0},
-	//	D3D11_INPUT_ELEMENT_DESC { "TEXTCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0}
-	//};
-
-	//D3D11_INPUT_ELEMENT_DESC inputElements[] =
-	//{
-	//	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//};
-
 	D3D11_INPUT_ELEMENT_DESC inputElements[] =
 	{
 		D3D11_INPUT_ELEMENT_DESC{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		D3D11_INPUT_ELEMENT_DESC{ "TEXCOORD",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-
-	//D3D11_INPUT_ELEMENT_DESC inputElements[] =
-	//{
-	//	D3D11_INPUT_ELEMENT_DESC{ "POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//	D3D11_INPUT_ELEMENT_DESC{ "TEXCOORD",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 4, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	//};
 
 	//создание шаблона вершин
 	res = device->CreateInputLayout(
@@ -283,9 +264,18 @@ void TextureObjComponent::Draw(ID3D11DeviceContext* context)
 
 void TextureObjComponent::DestroyResources()
 {
+	if (texSRV) texSRV->Release();
+	if (rastState) rastState->Release();
 	if (layout) layout->Release();
 	if (vertexShader) vertexShader->Release();
+	if (vertexBC) vertexBC->Release();
 	if (pixelShader) pixelShader->Release();
+	if (pixelBC) pixelBC->Release();
+	if (vertexBuffer) vertexBuffer->Release();
+	if (indexBuffer) indexBuffer->Release();
+	if (rastState) rastState->Release();
+	if (samplerState) samplerState->Release();
+	if (constantBuffer) constantBuffer->Release();
 }
 
 

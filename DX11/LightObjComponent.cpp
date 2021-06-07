@@ -6,17 +6,26 @@
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
 
-struct ConstantData
+//struct ConstantData
+//{
+//	Matrix WorldViewProj;
+//	Matrix World;
+//	Vector4 ViewerPos;
+//};
+//
+//struct LightData
+//{
+//	Vector4 Direction;
+//	//Vector4 Color;
+//	Vector4 KaSpecPowKsX;
+//};
+
+struct ConstantData 
 {
 	Matrix WorldViewProj;
 	Matrix World;
 	Vector4 ViewerPos;
-};
-
-struct LightData
-{
 	Vector4 Direction;
-	Vector4 Color;
 	Vector4 KaSpecPowKsX;
 };
 
@@ -61,7 +70,7 @@ HRESULT LightObjComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext*
 	res = device->CreateRasterizerState(&rastDesc, &rastState);
 	ZCHECK(res);
 
-	game->texLoader->LoadTextureFromFile(textureName, texture, texSRV, true, false); //грузим текстуру
+	game->texLoader->LoadTextureFromFile(textureName, texture, texSRV, true, false);
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -75,7 +84,7 @@ HRESULT LightObjComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext*
 	samplerDesc.BorderColor[3] = 1.0f;
 	samplerDesc.MaxLOD = INT_MAX;
 
-	res = device->CreateSamplerState(&samplerDesc, &samplerState); //создаем семплер стейт дл€ текстуры
+	res = device->CreateSamplerState(&samplerDesc, &samplerState);
 	ZCHECK(res);
 
 	return 0;
@@ -87,12 +96,12 @@ HRESULT LightObjComponent::CreateShaders(ID3D11Device* device)
 
 	ID3DBlob* errorVertexCode;
 
-	res = D3DCompileFromFile(L"TexLightShader.fx",//L"TextureShader.fx",
+	res = D3DCompileFromFile(L"TexLightShader.fx",
 		nullptr,
 		nullptr,
 		"VSMain",												//компил€ци€ вершинного шейдера (точка входа в fx файле)
 		"vs_5_0",												//тип шейдера_верси€ (vs - vertex shaider)
-		D3DCOMPILE_PACK_MATRIX_ROW_MAJOR, //D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,		//комбинаци€ флагов дл€ компил€ции шейдеров (| - or / или)
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,		//комбинаци€ флагов дл€ компил€ции шейдеров (| - or / или)
 		0,														//флаги дл€ компил€ции эффектов
 		&vertexBC,												//скомпилированный вершинный шейдер помещаетс€ сюда (байт код шедера)
 		&errorVertexCode);										//сообщение об ошибке, если код не удалось скомпилировать
@@ -114,12 +123,12 @@ HRESULT LightObjComponent::CreateShaders(ID3D11Device* device)
 
 	//пиксельный шейдер
 	ID3DBlob* errorPixelCode;
-	res = D3DCompileFromFile(L"TexLightShader.fx",//L"TextureShader.fx",
+	res = D3DCompileFromFile(L"TexLightShader.fx",
 		nullptr,
 		nullptr,
 		"PSMain",
 		"ps_5_0",
-		D3DCOMPILE_PACK_MATRIX_ROW_MAJOR, //D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, //D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
 		0,
 		&pixelBC,
 		&errorPixelCode);
@@ -231,36 +240,40 @@ HRESULT LightObjComponent::CreateBufers(ID3D11Device* device)
 	res = device->CreateBuffer(&constBufDesc, nullptr, &constantBuffer);
 	ZCHECK(res);
 
-	D3D11_BUFFER_DESC lightConstBufDesc = {};
-	lightConstBufDesc.Usage = D3D11_USAGE_DEFAULT;
-	lightConstBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	lightConstBufDesc.CPUAccessFlags = 0;
-	lightConstBufDesc.MiscFlags = 0;
-	lightConstBufDesc.StructureByteStride = 0;
-	lightConstBufDesc.ByteWidth = sizeof(LightData);
-
-	res = device->CreateBuffer(&lightConstBufDesc, nullptr, &lightBuffer);
+	//D3D11_BUFFER_DESC lightConstBufDesc = {};
+	//lightConstBufDesc.Usage = D3D11_USAGE_DEFAULT;
+	//lightConstBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	//lightConstBufDesc.CPUAccessFlags = 0;
+	//lightConstBufDesc.MiscFlags = 0;
+	//lightConstBufDesc.StructureByteStride = 0;
+	//lightConstBufDesc.ByteWidth = sizeof(LightData);
+	//
+	//res = device->CreateBuffer(&lightConstBufDesc, nullptr, &lightBuffer);
+	//ZCHECK(res);
 
 	return 0;
 }
 
 void LightObjComponent::Update(float deltaTime)//4
-{
-	auto wvp = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//исход€ из позиции создаетс€ транслешн матрица и умножаетс€ на матрицы камеры (камера обновл€етс€ перед этим)
-	//wvp = wvp.Transpose();
+{										
+	auto data = ConstantData{};
+	data.World = Matrix::CreateTranslation(objectPosition);
+	auto worldViewProj = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//исход€ из позиции создаетс€ транслешн матрица и умножаетс€ на матрицы камеры (камера обновл€етс€ перед этим)
+	worldViewProj = worldViewProj.Transpose();
+	data.WorldViewProj = worldViewProj;
+	data.Direction = Vector4(light_x, 2.0f, light_z, 1.0f);
+	data.KaSpecPowKsX = Vector4(0.5f, 0.5f, 0.2f, 1.0f);
 
 	D3D11_MAPPED_SUBRESOURCE res = {};
 	context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);					//запись в константный буфер
-
 	auto dataPtr = reinterpret_cast<float*>(res.pData);
-	memcpy(dataPtr, &wvp, sizeof(Matrix));												//копируем данные из матрицы
-
-	context->Unmap(constantBuffer, 0);													//подтверждение изменений в буфере
+	memcpy(dataPtr, &data, sizeof(ConstantData));										//копируем данные
+	context->Unmap(constantBuffer, 0);
 }
 
 void LightObjComponent::Draw(ID3D11DeviceContext* context)
 {
-	UINT strides = 48;//
+	UINT strides = 48;
 	UINT offsets = 0;
 
 	context->IASetInputLayout(layout);											//подключение шаблона вершин к устройству рисовани€
@@ -269,7 +282,8 @@ void LightObjComponent::Draw(ID3D11DeviceContext* context)
 	context->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);		//выставл€ем вершинный буфер
 
 	context->VSSetConstantBuffers(0, 1, &constantBuffer);						//выставл€ем константный буфер (отвечает за трансформ)
-	context->PSSetConstantBuffers(1, 1, &lightBuffer);
+	context->PSSetConstantBuffers(0, 1, &constantBuffer);
+	//context->PSSetConstantBuffers(1, 1, &lightBuffer);//
 
 	context->PSSetShaderResources(0, 1, &texSRV);								//подключаем SRV
 	context->PSSetSamplers(0, 1, &samplerState);								//подключаем семплер
@@ -287,7 +301,15 @@ void LightObjComponent::Draw(ID3D11DeviceContext* context)
 
 void LightObjComponent::DestroyResources()
 {
+	if (texSRV) texSRV->Release();
+	if (rastState) rastState->Release();
 	if (layout) layout->Release();
 	if (vertexShader) vertexShader->Release();
+	if (vertexBC) vertexBC->Release();
 	if (pixelShader) pixelShader->Release();
+	if (pixelBC) pixelBC->Release();
+	if (vertexBuffer) vertexBuffer->Release();
+	if (indexBuffer) indexBuffer->Release();
+	if (samplerState) samplerState->Release();
+	if (constantBuffer) constantBuffer->Release();	
 }

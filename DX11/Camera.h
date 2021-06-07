@@ -1,9 +1,6 @@
 #pragma once
 #include "pch.h"
-//#include "Game.h"
 #include "SimpleMath.h"
-
-//using namespace DirectX;
 
 class Game;
 
@@ -24,6 +21,5 @@ public:
 	DirectX::SimpleMath::Vector3 GetForwardVector() const;
 
 	DirectX::SimpleMath::Matrix UpdateProjectionMatrix();
-	//void UpdateProjectionMatrix();
 };
 

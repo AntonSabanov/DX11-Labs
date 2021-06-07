@@ -2,8 +2,6 @@
 #include "pch.h"
 #include "wincodec.h"
 
-//#include "Exports.h"
-
 class Game;
 
 class TextureLoader

@@ -1,10 +1,7 @@
 #pragma once
-#include "Game.h"//
-#include "Camera.h"//
+#include "Game.h"
+#include "Camera.h"
 #include "InputDevice.h"
-
-//class Game;
-//class Camera;
 
 class CameraController
 {

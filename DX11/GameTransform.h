@@ -11,8 +11,6 @@ public:
 	Camera* gameCamera = nullptr;
 	CameraController* gameCameraCtrl = nullptr;
 
-	//InputDevice* inputDevice;//перенести в game
-
 public:
 	GameTransform(DisplayWindow* display, std::string name) : Game(display, name)
 	{
@@ -20,9 +18,6 @@ public:
 
 	virtual void Initialize() override;	
 	virtual void Update(float deltaTime) override;
-
-	//void Draw() override;
-	//virtual void DestroyRecources() override;
 
 	void OnMouseMove(InputDevice::MouseMoveEventArgs& args);
 };

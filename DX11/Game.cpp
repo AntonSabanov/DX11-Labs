@@ -39,17 +39,12 @@ HRESULT Game::Run() //определение ресурсов и запуск цикла
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		//if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-		//	TranslateMessage(&msg);
-		//	DispatchMessage(&msg);
-		//}
 
 		// If windows signals to end the application then exit out.
 		if (msg.message == WM_QUIT) 
 		{
 			isExitRequested = true;
 		}
-
 
 #pragma region DrawSomeStaff
 		Draw();//update internal
@@ -62,7 +57,6 @@ HRESULT Game::Run() //определение ресурсов и запуск цикла
 
 void Game::Initialize()
 {
-	//Camera* gameCamera = new Camera(this);//
 	components.emplace_back(new TriangleComponent(device, context, 
 		{ Vector4(0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
 		Vector4(-0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 0.0f, 1.0f, 1.0f),
@@ -82,15 +76,6 @@ void Game::Initialize()
 		2,7,5,
 		7,2,1 },
 		nullptr));//камера
-
-	//components.emplace_back(new TriangleComponent(device, context, { Vector4(0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
-	//															Vector4(-0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-	//															Vector4(0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-	//	}));
-	//components.emplace_back(new TriangleComponent(device, context, { Vector4(-0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 0.0f, 1.0f, 1.0f),
-	//																Vector4(0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет		
-	//																Vector4(-0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f),
-	//	}));
 	
 	//создаем энное количество триангл компонентов и добовляем их в components 
 	//будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены
@@ -104,6 +89,7 @@ HRESULT Game::PrepareRecources()
 	//-----------------------------------------------------------------------------
 	//Установка параметров перед созданием устройства
 	//-----------------------------------------------------------------------------
+	 
 	//структура, описывающая цепь связи (свойства переднего буфера) параметры, по которым будет создаваться устройство
 	DXGI_SWAP_CHAIN_DESC swapDesc = {};
 	swapDesc.BufferCount = 2;//у нас 2 задних буфера(потому что у FLIP_DISCARD должно быть как минимум 2 буфера)
@@ -148,7 +134,6 @@ HRESULT Game::PrepareRecources()
 	ID3D11Debug* debug;
 	device->QueryInterface(IID_ID3D11Debug, (void**)&debug);
 
-	//D3D11_VIEWPORT viewport = {};
 	viewport.Width = static_cast<float>(appDisplay->screenWidth);
 	viewport.Height = static_cast<float>(appDisplay->screenHeight);
 	viewport.TopLeftX = 0;
@@ -159,9 +144,6 @@ HRESULT Game::PrepareRecources()
 	context->RSSetViewports(1, &viewport);
 	//context->OMSetRenderTargets(1, &rtv, nullptr);
 	context->OMSetRenderTargets(1, &rtv, depthView);
-
-	/*ID3D11Debug* debug;
-	device->QueryInterface(IID_ID3D11Debug, (void**)&debug);*/
 
 	return 0;
 }
@@ -226,7 +208,7 @@ void Game::Draw()
 	//-----------------------------------------------------------------------------
 	//CLEAR BACKBUFER
 	//-----------------------------------------------------------------------------
-	//float color[] = { totalTime, 0.1f, 0.1f, 1.0f };
+
 	float color[] = { 0.3f, 0.3f, 0.3f, 1.0f };//цвет, которым мы очищаем рендер таргет вью
 	
 	context->OMSetRenderTargets(1, &rtv, depthView);
@@ -238,24 +220,15 @@ void Game::Draw()
 #pragma region Draw
 
 	context->RSSetViewports(1, &viewport);
-	//context->OMSetRenderTargets(1, &rtv, depthView);
-
 	annotation->BeginEvent(L"BeginDraw");
-	//context_->DrawIndexed(6, 0, 0);
-
 	Update(deltaTime);
-
-	//for (auto&& i : components)
-	//{
-	//	i->Draw(context);
-	//}
 	annotation->EndEvent();
 	
 #pragma endregion Draw
 	//-----------------------------------------------------------------------------
 	//PRESENT RESULT
 	//-----------------------------------------------------------------------------
-//EndFrame
+
 	//swapChain1->Present(1, DXGI_PRESENT_DO_NOT_WAIT); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
 	swapChain1->Present(1, 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
 }
@@ -272,11 +245,8 @@ void Game::Update(float deltaTime)//3
 
 void Game::DestroyRecources()
 {
-	backBuffer->Release();
+	if (backBuffer) backBuffer->Release();
 	if (context) context->ClearState();
-	//if (constantBuffer) constantBuffer->Release();
-	//if (vertexBuffer) vertexBuffer->Release();
-	//if (indexBuffer) indexBuffer->Release();
 	for (auto c : components)
 	{
 		c->DestroyResources();
