@@ -16,6 +16,14 @@ Game::Game(DisplayWindow* display, std::string name)
 	Game::name = name;
 }
 
+Game::Game(DisplayWindow* display1, DisplayWindow* display2, std::string name)
+{
+	gameInstance = this;
+	Game::appDisplay = display1;
+	Game::appDisplay2 = display2;
+	Game::name = name;
+}
+
 HRESULT Game::Run() //определение ресурсов и запуск цикла
 {
 	PrepareRecources();//инициализируем параметры
@@ -239,7 +247,6 @@ void Game::Update(float deltaTime)//3
 	{
 		comp->Update(deltaTime);
 		comp->Draw(context);
-		//swapChain1->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
 	}
 }
 

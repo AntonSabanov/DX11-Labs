@@ -13,16 +13,27 @@ class Game
 public:
 	std::vector<GameComponent*> components;
 	std::string name;
+
 	DisplayWindow* appDisplay = nullptr;//окно приложения
+	DisplayWindow* appDisplay2 = nullptr;//окно приложения
+
 	D3D11_VIEWPORT viewport = {};
+
 	ID3D11Texture2D* backBuffer = nullptr; //задний буфер в виде текстуры	
+	ID3D11Texture2D* backBuffer2 = nullptr; //задний буфер в виде текстуры	
+
 	ID3D11Texture2D* depthBuffer = nullptr;
 	ID3D11DeviceContext* context = nullptr;//рисование
 	ID3DUserDefinedAnnotation* annotation = nullptr; // debug annotation
 	ID3D11Device* device;//девайс Microsoft::WRL::ComPtr<ID3D11Device>
 	std::chrono::time_point<std::chrono::steady_clock> PrevTime;
+
 	ID3D11RenderTargetView* rtv = nullptr;//объект заднего буфера, в который будем рисовать //RenderView		//?
+	ID3D11RenderTargetView* rtv2 = nullptr;//объект заднего буфера, в который будем рисовать //RenderView		//?
+
 	IDXGISwapChain* swapChain = nullptr;//работа с буферами, вывод на экран
+	IDXGISwapChain* swapChain2 = nullptr;
+
 	IDXGISwapChain1* swapChain1 = nullptr;
 	float totalTime = 0;
 	unsigned int frameCount = 0;
@@ -32,6 +43,7 @@ public:
 
 public:
 	Game(DisplayWindow* display, std::string name);
+	Game(DisplayWindow* display1, DisplayWindow* display2, std::string name);
 	
 	HRESULT Run();
 	virtual void Initialize(); //создаем энное количество триангл компонентов и добовляем их в components //будет переопределен в классе наследнике, там будут созданы компоненты, компоненты будут добавлены//затем пробигаем по всем компонентам и вызываем у них инишалайз

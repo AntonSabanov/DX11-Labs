@@ -4,7 +4,6 @@
 //----------------------------------------------------------------
 //CREATE A FORM
 //----------------------------------------------------------------	
-//static InputDevice* inDevice;
 
 DisplayWindow::DisplayWindow(int width, int height)
 {

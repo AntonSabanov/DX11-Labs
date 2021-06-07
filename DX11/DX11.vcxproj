@@ -144,6 +144,7 @@
     <ClCompile Include="CameraController.cpp" />
     <ClCompile Include="Delegates.cpp" />
     <ClCompile Include="DisplayWindow.cpp" />
+    <ClCompile Include="DoubleGame.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameTransform.cpp" />
     <ClCompile Include="GridComponent.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="CameraController.h" />
     <ClInclude Include="Delegates.h" />
     <ClInclude Include="DisplayWindow.h" />
+    <ClInclude Include="DoubleGame.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameComponent.h" />
     <ClInclude Include="GameTransform.h" />

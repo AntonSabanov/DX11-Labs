@@ -24,8 +24,9 @@
 #include <thread>
 
 #include "DisplayWindow.h"
-//#include "Game.h"
+
 #include "GameTransform.h"
+#include "DoubleGame.h"
 #include "InputDevice.h"
 
 #define ZCHECK(exp)                                                        \
@@ -51,17 +52,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	//CREATE A FORM
 	//----------------------------------------------------------------	
 
-	DisplayWindow* display = new DisplayWindow(1024, 1024);
+	DisplayWindow* display1 = new DisplayWindow(1024, 1024);
+	DisplayWindow* display2 = new DisplayWindow(1024, 1024);
 
 	//Game* game = new Game(display, "DX11 Framework");
 	//InputDevice* inputDevice = new InputDevice(game);
 	//game->inputDevice = inputDevice;
 	//game->Run();
 
-	GameTransform* game = new GameTransform(display, "DX11 Framework");
-	InputDevice* inputDevice = new InputDevice(game);
-	game->inputDevice = inputDevice;
-	game->Run();
+	//GameTransform* game = new GameTransform(display, "DX11 Framework");
+	//InputDevice* inputDevice = new InputDevice(game);
+	//game->inputDevice = inputDevice;
+	//game->Run();
+
+	DoubleGame* game2 = new DoubleGame(display1, display2, "DX11 Framework");
+	InputDevice* inputDevice2 = new InputDevice(game2);
+	game2->inputDevice = inputDevice2;
+	game2->Run();
 
 }
 

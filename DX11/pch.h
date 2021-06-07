@@ -12,6 +12,7 @@
 #include <d3dcompiler.h>
 #include <directxmath.h>
 #include <DirectXColors.h>
+#include <dxgi.h>
 
 #include <iostream>
 #include <sstream>
