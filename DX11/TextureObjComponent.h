@@ -29,7 +29,7 @@ public:
 	//ID3DUserDefinedAnnotation* annotation = nullptr;
 
 	ID3D11Buffer* constantBuffer = nullptr;				//константный буфер
-	Camera* gameCamera = nullptr;						//от сюда будем получать матрицы вида и проекции
+	//Camera* gameCamera = nullptr;						//от сюда будем получать матрицы вида и проекции
 
 	Vector3 objectPosition;		//позиция самого объекта
 	DirectX::SimpleMath::Matrix Transform;
@@ -51,6 +51,8 @@ public:
 						LPCWSTR inFileName,
 						LPCWSTR inTexName,
 						Camera* camera);
+	TextureObjComponent(Game* inGame, Vector3 startPosition, std::vector<Vector4> points, std::vector<int> indeces, LPCWSTR inTexName);
+
 
 	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;
 
@@ -59,6 +61,7 @@ public:
 	//void Reload() override;
 	void Update(float deltaTime) override;
 	void DestroyResources() override;
+	void GetGameInstance(Game* inGame) override;
 
 private:
 	HRESULT CreateShaders(ID3D11Device* device);

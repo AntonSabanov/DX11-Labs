@@ -2,8 +2,12 @@
 #include "TriangleComponent.h"
 #include "SimpleMath.h"
 
+#include "Game.h"
+
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
+
+//class Game;
 
 TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* context, std::vector<Vector4> points, std::vector<int> indeces, Camera* camera)
 {
@@ -15,10 +19,33 @@ TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* 
 	{
 		pointIndeces.emplace_back(indeces[i]);
 	}
-	TriangleComponent::context = context;
-	gameCamera = camera;
+	
+	//TriangleComponent::context = context;
+	//gameCamera = camera;
 	objectPosition = Vector3::Zero;//установка позиции объекта
 	Initialize(device, context);//сразу инициализируем объект
+}
+
+TriangleComponent::TriangleComponent(Game* inGame, std::vector<Vector4> points, std::vector<int> indeces)
+{
+	game = inGame;
+
+	for (size_t i = 0; i < points.size(); ++i)
+	{
+		triangleObjPoints.emplace_back(points[i]);
+	}
+	for (size_t i = 0; i < indeces.size(); ++i)//заполнение массива индексов
+	{
+		pointIndeces.emplace_back(indeces[i]);
+	}
+
+	objectPosition = Vector3::Zero;//установка позиции объекта
+	//Initialize(device, context);//сразу инициализируем объект
+}
+
+void TriangleComponent::GetGameInstance(Game* inGame)
+{
+	game = inGame;
 }
 
 HRESULT TriangleComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext* context)
@@ -231,12 +258,12 @@ void TriangleComponent::Update(float deltaTime)//4
 	wvp = wvp.Transpose();
 
 	D3D11_MAPPED_SUBRESOURCE res = {};
-	context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);					//запись в константный буфер
+	game->context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);					//запись в константный буфер
 
 	auto dataPtr = reinterpret_cast<float*>(res.pData);
 	memcpy(dataPtr, &wvp, sizeof(Matrix));												//копируем данные из матрицы
 
-	context->Unmap(constantBuffer, 0);													//подтверждение изменений в буфере
+	game->context->Unmap(constantBuffer, 0);													//подтверждение изменений в буфере
 }
 
 void TriangleComponent::Draw(ID3D11DeviceContext* context)

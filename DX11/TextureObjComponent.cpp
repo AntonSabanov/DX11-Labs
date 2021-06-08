@@ -31,6 +31,31 @@ TextureObjComponent::TextureObjComponent(Game* inGame, ID3D11Device* device, ID3
 	Initialize(device, context);						//сразу инициализируем объект
 }
 
+TextureObjComponent::TextureObjComponent(Game* inGame, Vector3 startPosition, std::vector<Vector4> points, std::vector<int> indeces, LPCWSTR inTexName)
+{
+	game = inGame;
+
+	for (size_t i = 0; i < points.size(); ++i)
+	{
+		triangleObjPoints.emplace_back(points[i]);
+	}
+	for (size_t i = 0; i < indeces.size(); ++i)			//заполнение массива индексов
+	{
+		pointIndeces.emplace_back(indeces[i]);
+	}
+	
+	objectPosition = startPosition;//Vector3::Zero + Vector3(0, 1, 0);						//установка позиции объекта
+
+	textureName = inTexName;
+
+	//Initialize(device, context);						//сразу инициализируем объект
+}
+
+void TextureObjComponent::GetGameInstance(Game* inGame)
+{
+	game = inGame;
+}
+
 HRESULT TextureObjComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext* context)
 {
 	HRESULT res;
@@ -47,7 +72,7 @@ HRESULT TextureObjComponent::Initialize(ID3D11Device* device, ID3D11DeviceContex
 	rastDesc.FillMode = D3D11_FILL_SOLID;		//принцып рисования объектов (SOLID - запоненный, WIREFRAME - только сетка)
 	rastDesc.FrontCounterClockwise = true;		//обход по часовой или против часовой ститается фронтом
 	
-	res = device->CreateRasterizerState(&rastDesc, &rastState);
+	res = game->device->CreateRasterizerState(&rastDesc, &rastState);
 	ZCHECK(res);
 
 	game->texLoader->LoadTextureFromFile(textureName, texture, texSRV, true, false); //грузим нашу текстуру
@@ -228,12 +253,12 @@ void TextureObjComponent::Update(float deltaTime)//4
 	wvp = wvp.Transpose();
 
 	D3D11_MAPPED_SUBRESOURCE res = {};
-	context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);					//запись в константный буфер
+	game->context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);					//запись в константный буфер
 
 	auto dataPtr = reinterpret_cast<float*>(res.pData);
 	memcpy(dataPtr, &wvp, sizeof(Matrix));												//копируем данные из матрицы
 
-	context->Unmap(constantBuffer, 0);													//подтверждение изменений в буфере
+	game->context->Unmap(constantBuffer, 0);													//подтверждение изменений в буфере
 }
 
 void TextureObjComponent::Draw(ID3D11DeviceContext* context)

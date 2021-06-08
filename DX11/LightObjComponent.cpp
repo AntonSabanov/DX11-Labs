@@ -51,6 +51,30 @@ LightObjComponent::LightObjComponent(Game* inGame, ID3D11Device* device, ID3D11D
 	Initialize(device, context);						//сразу инициализируем объект
 }
 
+LightObjComponent::LightObjComponent(Game* inGame, Vector3 startPosition, std::vector<Vector4> points, std::vector<int> indeces, LPCWSTR inTexName)
+{
+	game = inGame;
+
+	for (size_t i = 0; i < points.size(); ++i)
+	{
+		triangleObjPoints.emplace_back(points[i]);
+	}
+	for (size_t i = 0; i < indeces.size(); ++i)			//заполнение массива индексов
+	{
+		pointIndeces.emplace_back(indeces[i]);
+	}
+	objectPosition = startPosition;						//установка позиции объекта
+
+	textureName = inTexName;
+
+	//Initialize(device, context);						//сразу инициализируем объект
+}
+
+void LightObjComponent::GetGameInstance(Game* inGame)
+{
+	game = inGame;
+}
+
 HRESULT LightObjComponent::Initialize(ID3D11Device* device, ID3D11DeviceContext* context)
 {
 	HRESULT res;

@@ -4,12 +4,15 @@
 #include "Camera.h"
 #include "CameraController.h"
 #include "InputDevice.h"
+#include "GameTransform.h"
 
-class DoubleGame :  public Game
+class DoubleGame //:  public Game
 {
 public:
-	Camera* gameCamera = nullptr;
-	CameraController* gameCameraCtrl = nullptr;
+	/*Camera* gameCamera = nullptr;
+	CameraController* gameCameraCtrl = nullptr;*/
+	ID3D11Device* device = nullptr;//global
+	ID3D11DeviceContext* context = nullptr;//global
 
 	IDXGIFactory* factory;
 	IDXGIAdapter* adapter;
@@ -18,17 +21,24 @@ public:
 
 	IDXGIDevice* superDevice;
 	
+	std::vector<GameTransform*> gameWindows;
 
 public:
-	DoubleGame(DisplayWindow* display1, DisplayWindow* display2, std::string name) : Game(display1, display2, name)
-	{
-	}
+	DoubleGame(std::vector<GameTransform*> games);
 
 	HRESULT CreateBackBufers();
+	HRESULT PrepareRecources();
+	HRESULT DoubleRun();
 
-	virtual HRESULT PrepareRecources() override;
-	virtual void Initialize() override;
-	virtual void Update(float deltaTime) override;
+	void Initialize();
+	//void Update(float deltaTime);
+
+	void Draw(); // пробегает по всем компонентам и вызывает у них метод draw
+	void DestroyRecources();
+
+	//virtual HRESULT PrepareRecources() override;
+	//virtual void Initialize() override;
+	//virtual void Update(float deltaTime) override;
 	
 
 	void OnMouseMove(InputDevice::MouseMoveEventArgs& args);

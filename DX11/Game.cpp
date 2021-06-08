@@ -7,6 +7,8 @@
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
 
+//class GameTransform;
+
 Game* gameInstance;
 
 Game::Game(DisplayWindow* display, std::string name)
@@ -20,9 +22,54 @@ Game::Game(DisplayWindow* display1, DisplayWindow* display2, std::string name)
 {
 	gameInstance = this;
 	Game::appDisplay = display1;
-	Game::appDisplay2 = display2;
+	//Game::appDisplay2 = display2;
 	Game::name = name;
 }
+
+Game::Game(DisplayWindow* display,  std::string name, ID3D11Device* globalDevice, ID3D11DeviceContext* globalContext, std::vector <GameComponent*> gameObjects)
+{
+	gameInstance = this;
+	Game::appDisplay = display;
+	Game::name = name;
+	Game::device = globalDevice;
+	Game::context = globalContext;
+	for (size_t i = 0; i < gameObjects.size(); ++i)//заполнение массива GameComponents
+	{
+		components.emplace_back(gameObjects[i]);
+	}
+}
+
+//Game::Game(std::vector<GameTransform*>)
+//{
+//
+//}
+
+//HRESULT Game::DoubleRun()
+//{
+//	//CreateLocalRecources();
+//
+//	MSG msg = {};
+//
+//	bool isExitRequested = false;
+//	while (!isExitRequested)
+//	{
+//		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+//		{
+//			TranslateMessage(&msg);
+//			DispatchMessage(&msg);
+//		}
+//
+//		if (msg.message == WM_QUIT)
+//		{
+//			isExitRequested = true;
+//		}
+//
+//		Draw();//update internal
+//	}
+//
+//	DestroyRecources();
+//	return 0;
+//}
 
 HRESULT Game::Run() //определение ресурсов и запуск цикла
 {
@@ -90,6 +137,61 @@ void Game::Initialize()
 	//затем пробигаем по всем компонентам и вызываем у них инишалайз
 }
 
+HRESULT Game::CreateLocalRecources()//create swap chain
+{
+	HRESULT res;
+
+	DXGI_SWAP_CHAIN_DESC swapDesc = {};
+	swapDesc.BufferCount = 2;
+	swapDesc.BufferDesc.Width = appDisplay->screenWidth;	
+	swapDesc.BufferDesc.Height = appDisplay->screenHeight;
+	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapDesc.BufferDesc.RefreshRate.Numerator = 60;
+	swapDesc.BufferDesc.RefreshRate.Denominator = 1;
+	swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapDesc.OutputWindow = appDisplay->hWnd;
+	swapDesc.Windowed = true;
+	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	swapDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	swapDesc.SampleDesc.Count = 1; 
+	swapDesc.SampleDesc.Quality = 0;
+
+	//создаем свапчейн
+	res = device->QueryInterface(__uuidof(IDXGIDevice), (void**)&superDevice);
+	if (SUCCEEDED(res))
+		res = superDevice->GetAdapter(&adapter);
+
+	if (SUCCEEDED(res))
+	{
+		adapter->GetParent(IID_PPV_ARGS(&factory));
+		res = factory->CreateSwapChain(device, &swapDesc, &swapChain);
+		ZCHECK(res);
+	}
+
+	CreateBackBufer();//создаем задний буфер
+
+	swapChain->QueryInterface<IDXGISwapChain1>(&swapChain1);
+
+	context->QueryInterface(IID_ID3DUserDefinedAnnotation, (void**)&annotation);
+
+	ID3D11Debug* debug;
+	device->QueryInterface(IID_ID3D11Debug, (void**)&debug);
+
+	viewport.Width = static_cast<float>(appDisplay->screenWidth);
+	viewport.Height = static_cast<float>(appDisplay->screenHeight);
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.MinDepth = 0;
+	viewport.MaxDepth = 1.0f;
+
+	context->RSSetViewports(1, &viewport);
+	context->OMSetRenderTargets(1, &rtv, depthView);
+
+	return 0;
+}
+
 HRESULT Game::PrepareRecources()
 {
 	HRESULT res; //сюда записывается результат проверок
@@ -150,7 +252,6 @@ HRESULT Game::PrepareRecources()
 	viewport.MaxDepth = 1.0f;
 
 	context->RSSetViewports(1, &viewport);
-	//context->OMSetRenderTargets(1, &rtv, nullptr);
 	context->OMSetRenderTargets(1, &rtv, depthView);
 
 	return 0;
@@ -218,15 +319,22 @@ void Game::Draw()
 	//-----------------------------------------------------------------------------
 
 	float color[] = { 0.3f, 0.3f, 0.3f, 1.0f };//цвет, которым мы очищаем рендер таргет вью
-	
-	context->OMSetRenderTargets(1, &rtv, depthView);
-	//context->OMSetRenderTargets(1, &rtv, nullptr);//так как у нас флип модель, надо это делать на каждом кадре//Подключаем объект заднего буфера к контексту устройства (очистка заднего буфера)
+	float color2[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+
+	context->OMSetRenderTargets(1, &rtv, depthView);//depthView
+	//context->OMSetRenderTargets(2, targets, nullptr);//depthView
+	//context->ClearRenderTargetView(*targets, color);//очистили цветом
 	context->ClearRenderTargetView(rtv, color);//очистили цветом
+
+	//context->OMSetRenderTargets(1, &rtv2, nullptr);//1 - количество эллементов в массиве рендер таргетов
+	//context->ClearRenderTargetView(rtv2, color2);//очистили цветом
+
 	context->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 #pragma endregion PrepareFrame
 
 #pragma region Draw
 
+	//context->RSSetViewports(2, viewports);
 	context->RSSetViewports(1, &viewport);
 	annotation->BeginEvent(L"BeginDraw");
 	Update(deltaTime);
@@ -238,7 +346,10 @@ void Game::Draw()
 	//-----------------------------------------------------------------------------
 
 	//swapChain1->Present(1, DXGI_PRESENT_DO_NOT_WAIT); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
-	swapChain1->Present(1, 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
+	//swapChain1->Present(1, 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
+	
+	swapChain->Present(1, 0);
+	//swapChain2->Present(1, 0);
 }
 
 void Game::Update(float deltaTime)//3

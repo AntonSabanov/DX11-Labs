@@ -7,11 +7,13 @@
 using namespace DirectX::SimpleMath;
 
 //class Camera;
+class Game;
 
 class TriangleComponent : public GameComponent
 {
 public:
-	ID3D11DeviceContext* context;
+	//ID3D11DeviceContext* context;
+	Game* game = nullptr;
 
 	std::vector<Vector4> triangleObjPoints; //список координат точек объекта
 	std::vector<int> pointIndeces;
@@ -27,7 +29,7 @@ public:
 	//ID3DUserDefinedAnnotation* annotation = nullptr;
 
 	ID3D11Buffer* constantBuffer = nullptr;//константный буфер
-	Camera* gameCamera = nullptr;//от сюда будем получать матрицы вида и проекции
+	//Camera* gameCamera = nullptr;//от сюда будем получать матрицы вида и проекции
 
 	Vector3 objectPosition;//позиция самого объекта
 
@@ -40,6 +42,8 @@ public:
 						std::vector<int> indeces,
 						Camera* camera);
 
+	TriangleComponent(Game* inGame, std::vector<Vector4> points, std::vector<int> indeces);
+
 	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;
 
 	void Draw(ID3D11DeviceContext* context) override;
@@ -47,6 +51,8 @@ public:
 	//void Reload() override;
 	void Update(float deltaTime) override;
 	void DestroyResources() override;
+
+	void GetGameInstance(Game* inGame) override;
 
 private:
 	HRESULT CreateShaders(ID3D11Device* device);

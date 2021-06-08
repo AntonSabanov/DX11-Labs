@@ -55,6 +55,7 @@ public:
 public:
 
 	InputDevice(Game* inGame);
+	//InputDevice(Game* inGame1, Game* inGame2 );
 	//InputDevice()
 	~InputDevice();
 

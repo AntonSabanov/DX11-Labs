@@ -24,7 +24,7 @@ public:
 	ID3D11RasterizerState* rastState = nullptr;			//настройка отрисовки для конкретного объекта
 	ID3D11SamplerState* samplerState = nullptr;
 	ID3D11Buffer* constantBuffer = nullptr;				//константный буфер
-	Camera* gameCamera = nullptr;						//от сюда будем получать матрицы вида и проекции
+	//Camera* gameCamera = nullptr;						//от сюда будем получать матрицы вида и проекции
 	Vector3 objectPosition;								//позиция самого объекта
 	DirectX::SimpleMath::Vector4* points = nullptr;
 	LPCWSTR objFileName;								//имя 3д модели
@@ -47,12 +47,15 @@ public:
 		LPCWSTR inFileName,
 		LPCWSTR inTexName,
 		Camera* camera);
+	LightObjComponent(Game* inGame, Vector3 startPosition, std::vector<Vector4> points, std::vector<int> indeces, LPCWSTR inTexName);
+
 
 	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;
 
 	void Draw(ID3D11DeviceContext* context) override;
 	void Update(float deltaTime) override;
 	void DestroyResources() override;
+	void GetGameInstance(Game* inGame) override;
 
 private:
 	HRESULT CreateShaders(ID3D11Device* device);

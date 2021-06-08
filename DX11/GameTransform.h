@@ -14,7 +14,11 @@ public:
 public:
 	GameTransform(DisplayWindow* display, std::string name) : Game(display, name)
 	{
-	}
+	};
+	GameTransform(DisplayWindow* display, std::string name, ID3D11Device* globalDevice, ID3D11DeviceContext* globalContext, std::vector <GameComponent*> gameObjects) 
+		: Game(display, name, globalDevice, globalContext, gameObjects)
+	{
+	};
 
 	virtual void Initialize() override;	
 	virtual void Update(float deltaTime) override;

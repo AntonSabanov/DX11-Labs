@@ -5,12 +5,16 @@
 
 #include "SimpleMath.h"
 
+
 using namespace DirectX::SimpleMath;
+
+class Game;
 
 class GridComponent : public GameComponent
 {
 public:
 	ID3D11DeviceContext* context;
+	Game* game = nullptr;
 
 	std::vector<Vector4> objectPoints; //список координат точек объекта
 	std::vector<int> pointIndeces;
@@ -26,7 +30,7 @@ public:
 	//ID3DUserDefinedAnnotation* annotation = nullptr;
 
 	ID3D11Buffer* constantBuffer = nullptr;//константный буфер
-	Camera* gameCamera = nullptr;//от сюда будем получать матрицы вида и проекции
+	//Camera* gameCamera = nullptr;//от сюда будем получать матрицы вида и проекции
 
 	Vector3 objectPosition;//позиция самого объекта
 
@@ -34,12 +38,14 @@ public:
 
 public:
 	GridComponent(ID3D11Device* device, ID3D11DeviceContext* context, std::vector<Vector4> points, std::vector<int> indeces, Camera* camera);
+	GridComponent(Game* inGame, std::vector<Vector4> points, std::vector<int> indeces);
 
 	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;//?
 	void Draw(ID3D11DeviceContext* context) override; // берем гейм, у гейма достаем контекст и у контекста вызываем сет пиксель шейдер, сет - вертекс шейдерб сет растерайзед стейт, сет вертекс буфер
 	//virtual void Reload() override;
 	void Update(float deltaTime) override;//апдетить значения в буферах
 	void DestroyResources() override;
+	void GetGameInstance(Game* inGame) override;
 //
 private:
 	HRESULT CreateShaders(ID3D11Device* device);
