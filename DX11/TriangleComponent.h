@@ -35,6 +35,11 @@ public:
 
 	DirectX::SimpleMath::Vector4* points = nullptr;
 
+	float rotationInc = 0.0f;
+	float scaleInc = 0.0f;
+	float rotation = 0.0f;
+	float scale = 1.0f;
+
 public:
 	TriangleComponent(ID3D11Device* device,
 						ID3D11DeviceContext* context, 
@@ -42,7 +47,7 @@ public:
 						std::vector<int> indeces,
 						Camera* camera);
 
-	TriangleComponent(Game* inGame, std::vector<Vector4> points, std::vector<int> indeces);
+	TriangleComponent(Game* inGame, std::vector<Vector4> points, std::vector<int> indeces, ObjectTransform* transform);
 
 	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;
 

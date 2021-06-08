@@ -26,7 +26,7 @@ TriangleComponent::TriangleComponent(ID3D11Device* device, ID3D11DeviceContext* 
 	Initialize(device, context);//сразу инициализируем объект
 }
 
-TriangleComponent::TriangleComponent(Game* inGame, std::vector<Vector4> points, std::vector<int> indeces)
+TriangleComponent::TriangleComponent(Game* inGame, std::vector<Vector4> points, std::vector<int> indeces, ObjectTransform* transform)
 {
 	game = inGame;
 
@@ -40,6 +40,9 @@ TriangleComponent::TriangleComponent(Game* inGame, std::vector<Vector4> points, 
 	}
 
 	objectPosition = Vector3::Zero;//установка позиции объекта
+
+	rotationInc = transform->rotationAngle;
+	scaleInc = transform->scaleKoeff;
 	//Initialize(device, context);//сразу инициализируем объект
 }
 
@@ -254,7 +257,14 @@ HRESULT TriangleComponent::CreateBufers(ID3D11Device* device)
 
 void TriangleComponent::Update(float deltaTime)//4
 {
-	auto wvp = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//исходя из позиции создается транслешн матрица и умножается на матрицы камеры (камера обновляется перед этим)
+	rotation += rotationInc;
+	scale *= scaleInc;
+	if (rotation >= 360) rotation = 0;
+	if (scale >= 2) scaleInc = 1 / scaleInc;
+	if (scale <= 1) scaleInc = 1 / scaleInc;
+	auto wvp = Matrix::CreateTranslation(objectPosition) * Matrix::CreateScale(scale) * Matrix::CreateRotationY(rotation);
+	//auto wvp = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//исходя из позиции создается транслешн матрица и умножается на матрицы камеры (камера обновляется перед этим)
+	wvp *= gameCamera->viewMatrix * gameCamera->projectionMatrix;
 	wvp = wvp.Transpose();
 
 	D3D11_MAPPED_SUBRESOURCE res = {};

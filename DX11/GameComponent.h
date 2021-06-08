@@ -5,12 +5,17 @@
 class Game;
 class Camera;
 
+struct ObjectTransform
+{
+    float rotationAngle = 0.0f;
+    float scaleKoeff = 1.0f;
+};
+
 class GameComponent
 {   
 public:
-    //ID3D11DeviceContext* context;
     Camera* gameCamera = nullptr;   //от сюда будем получать матрицы вида и проекции
-    //Vector3 objectPosition;         //позиция самого объекта
+
 
 public:
     virtual HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) = 0;//?

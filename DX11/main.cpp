@@ -47,6 +47,7 @@ using namespace DirectX;
 GridComponent* grid;				//сетка
 GridComponent* basis;				//нулевой пивот
 TriangleComponent* triangleObject;	//объект из треугольников
+TriangleComponent* triangleObject2;	//объект из треугольников
 TextureObjComponent* texObj;		//объект с текстурой
 LightObjComponent* texLightObj;		//объект со светом
 
@@ -62,7 +63,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	//----------------------------------------------------------------	
 
 	DisplayWindow* display1 = new DisplayWindow(1024, 1024);
-	DisplayWindow* display2 = new DisplayWindow(1024, 1024);
+	DisplayWindow* display2 = new DisplayWindow(800, 800);
 
 	//нулевой пивот
 	basis = new GridComponent(nullptr, {
@@ -115,6 +116,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 		},
 		{ 0,1, 2,3, 4,5, 6,7, 8,9, 10,11, 12,13, 14,15, 16,17, 18,19, 20,21, 22,23, 24,25, 26,27, 28,29, 30,31, 32,33, 34,35 });
 
+	ObjectTransform transform2 = {};
+	transform2.rotationAngle = 0.01f;
+	transform2.scaleKoeff = 1.0f;
+
+	ObjectTransform transform1 = {};
+	transform1.rotationAngle = 0.0f;
+	transform1.scaleKoeff = 1.005f;
+
 	//кубик
 	triangleObject = new TriangleComponent(nullptr,{
 		Vector4(0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 1.0f), //позиция (от -1 до 1) //цвет
@@ -126,10 +135,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 		Vector4(-0.5f, 0.5f, -0.5f, 1.0f),	Vector4(0.0f, 1.0f, 0.0f, 1.0f),
 		Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f),
 		}, { //массив индексов для кубика
-		0,1,2, 1,0,3, 4,2,5, 2,4,0, 6,5,7, 5,6,4, 3,7,1, 7,3,6, 4,3,0, 3,4,6, 2,7,5, 7,2,1 });
+		0,1,2, 1,0,3, 4,2,5, 2,4,0, 6,5,7, 5,6,4, 3,7,1, 7,3,6, 4,3,0, 3,4,6, 2,7,5, 7,2,1 }, &transform1);
+
+	//пирамидка
+	triangleObject2 = new TriangleComponent(nullptr, {
+		 Vector4(0.0f,  1.0f,  0.0f, 1.0f),		Vector4(1.0f, 1.0f, 0.0f, 1.0f),
+		 Vector4(-0.5f,  0.0f, -0.5f, 1.0f),	Vector4(0.0f, 1.0f, 0.0f, 1.0f),
+		 Vector4(0.5f,  0.0f, -0.5f, 1.0f),		Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+		 Vector4(-0.5f,  0.0f,  0.5f, 1.0f),	Vector4(0.0f, 1.0f, 1.0f, 1.0f),
+		 Vector4(0.5f,  0.0f,  0.5f, 1.0f),		Vector4(1.0f, 0.0f, 1.0f, 1.0f),},
+{		0,2,1,
+		0,3,4,
+		0,1,3,
+		0,4,2,
+		1,2,3,
+		2,4,3, }, &transform1);
 
 	//кубик с текстурой
-	texObj = new TextureObjComponent(nullptr,(Vector3::Zero + Vector3(0, -1, 0)), {
+	texObj = new TextureObjComponent(nullptr,(Vector3::Zero + Vector3(0, 0, 0)), {
 		Vector4(0.5f, 0.5f, 0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 0.0f),		//0
 		Vector4(-0.5f, -0.5f, 0.5f, 1.0f),	Vector4(0.0f, 1.0f, 0.0f, 0.0f),		//1
 		Vector4(0.5f, -0.5f, 0.5f, 1.0f),	Vector4(1.0f, 1.0f, 0.0f, 0.0f),		//2
@@ -139,9 +162,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 		Vector4(-0.5f, 0.5f, -0.5f, 1.0f),	Vector4(1.0f, 0.0f, 0.0f, 0.0f),		//6
 		Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector4(1.0f, 1.0f, 0.0f, 0.0f), },		//7
 		{ 0,1,2, 1,0,3, 4,2,5, 2,4,0, 6,5,7, 5,6,4, 3,7,1, 7,3,6, 4,3,0, 3,4,6, 2,7,5, 7,2,1 },//массив индексов для кубика
-		L"WallTex3.png");
+		&transform2, L"WallTex3.png");
 
-	//как в примере, но с другими координатами
+	//кубик с текстурой и светом
 	texLightObj = new LightObjComponent(nullptr, (Vector3::Zero + Vector3(0, 1, 0)), {
 		Vector4(-0.5f, 0.5f, -0.5f, 1.0f),		Vector4(0.0f, 1.0f, 0.0f, 1.0f),	Vector4(0.0f, 0.0f, 1.0f, 1.0f),
 		Vector4(0.5f, 0.5f, -0.5f, 1.0f),		Vector4(0.0f, 1.0f, 0.0f, 1.0f),	Vector4(1.0f, 0.0f, 1.0f, 1.0f),
@@ -180,14 +203,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	//game->inputDevice = inputDevice;
 	//game->Run();
 
-
-	GameTransform* game1 = new GameTransform(display1, "Left", nullptr, nullptr, { basis, grid, triangleObject });//левое окно
+	GameTransform* game1 = new GameTransform(display1, "Left", nullptr, nullptr, { basis, grid, triangleObject2 });//левое окно
 	GameTransform* game2 = new GameTransform(display2, "Right", nullptr, nullptr, { basis, grid, texObj });//правое окно
-	//for (size_t i = 0; i < components.size(); ++i)
-	//{
-	//	components[i]->game = context;
-	//	components[i]->gameCamera = gameCamera;
-	//}
 	InputDevice* inputDevice = new InputDevice(game1);
 	//InputDevice* inputDevice2 = new InputDevice(game2);
 	game1->inputDevice = inputDevice;
@@ -195,7 +212,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 
 	DoubleGame* doubleGame = new DoubleGame({ game1, game2 });
 	doubleGame->DoubleRun();
-	//game2->Run();
-
 }
 

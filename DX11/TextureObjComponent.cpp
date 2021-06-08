@@ -31,7 +31,7 @@ TextureObjComponent::TextureObjComponent(Game* inGame, ID3D11Device* device, ID3
 	Initialize(device, context);						//сразу инициализируем объект
 }
 
-TextureObjComponent::TextureObjComponent(Game* inGame, Vector3 startPosition, std::vector<Vector4> points, std::vector<int> indeces, LPCWSTR inTexName)
+TextureObjComponent::TextureObjComponent(Game* inGame, Vector3 startPosition, std::vector<Vector4> points, std::vector<int> indeces, ObjectTransform* transform, LPCWSTR inTexName)
 {
 	game = inGame;
 
@@ -47,6 +47,8 @@ TextureObjComponent::TextureObjComponent(Game* inGame, Vector3 startPosition, st
 	objectPosition = startPosition;//Vector3::Zero + Vector3(0, 1, 0);						//установка позиции объекта
 
 	textureName = inTexName;
+	rotationInc = transform->rotationAngle;
+	scaleInc = transform->scaleKoeff;
 
 	//Initialize(device, context);						//сразу инициализируем объект
 }
@@ -249,8 +251,14 @@ HRESULT TextureObjComponent::CreateBufers(ID3D11Device* device)
 
 void TextureObjComponent::Update(float deltaTime)//4
 {
-	auto wvp = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//исходя из позиции создается транслешн матрица и умножается на матрицы камеры (камера обновляется перед этим)
-	wvp = wvp.Transpose();
+	rotation += rotationInc;
+	scale *= scaleInc;
+	if (rotation >= 360) rotation = 0;
+	if (scale >= 2) scaleInc = 1 / scaleInc;
+	if (scale <= 1) scaleInc = 1 / scaleInc;
+	auto wvp = Matrix::CreateTranslation(objectPosition) * Matrix::CreateScale(scale) * Matrix::CreateRotationY(rotation);
+	//auto wvp = Matrix::CreateTranslation(objectPosition) * gameCamera->viewMatrix * gameCamera->projectionMatrix;//исходя из позиции создается транслешн матрица и умножается на матрицы камеры (камера обновляется перед этим)
+	wvp *= gameCamera->viewMatrix * gameCamera->projectionMatrix;	wvp = wvp.Transpose();
 
 	D3D11_MAPPED_SUBRESOURCE res = {};
 	game->context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);					//запись в константный буфер

@@ -322,19 +322,13 @@ void Game::Draw()
 	float color2[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 	context->OMSetRenderTargets(1, &rtv, depthView);//depthView
-	//context->OMSetRenderTargets(2, targets, nullptr);//depthView
-	//context->ClearRenderTargetView(*targets, color);//очистили цветом
 	context->ClearRenderTargetView(rtv, color);//очистили цветом
-
-	//context->OMSetRenderTargets(1, &rtv2, nullptr);//1 - количество эллементов в массиве рендер таргетов
-	//context->ClearRenderTargetView(rtv2, color2);//очистили цветом
 
 	context->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 #pragma endregion PrepareFrame
 
 #pragma region Draw
 
-	//context->RSSetViewports(2, viewports);
 	context->RSSetViewports(1, &viewport);
 	annotation->BeginEvent(L"BeginDraw");
 	Update(deltaTime);
@@ -349,7 +343,7 @@ void Game::Draw()
 	//swapChain1->Present(1, 0); //вывести в передний буфер (на экран) информацию в заднем буфере //EndFrame
 	
 	swapChain->Present(1, 0);
-	//swapChain2->Present(1, 0);
+
 }
 
 void Game::Update(float deltaTime)//3

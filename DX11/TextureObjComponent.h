@@ -41,6 +41,11 @@ public:
 	ID3D11Texture2D* texture;							//текстура
 	ID3D11ShaderResourceView* texSRV;					//
 
+	float rotationInc = 0.0f;
+	float scaleInc = 0.0f;
+	float rotation = 0.0f;
+	float scale = 1.0f;
+
 public:
 	TextureObjComponent(Game* inGame, 
 						ID3D11Device* device,
@@ -51,7 +56,7 @@ public:
 						LPCWSTR inFileName,
 						LPCWSTR inTexName,
 						Camera* camera);
-	TextureObjComponent(Game* inGame, Vector3 startPosition, std::vector<Vector4> points, std::vector<int> indeces, LPCWSTR inTexName);
+	TextureObjComponent(Game* inGame, Vector3 startPosition, std::vector<Vector4> points, std::vector<int> indeces, ObjectTransform* transform, LPCWSTR inTexName);
 
 
 	HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) override;
